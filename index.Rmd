@@ -1,0 +1,18 @@
+--- 
+title: "Inference in multivariate autoregressive process and its extensions"
+author: "Pierre Gloaguen"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+documentclass: book
+bibliography: [book.bib, packages.bib]
+biblio-style: apalike
+link-citations: yes
+description: "This document aims at covering inference in multivariate autoregressive models, from the simplest context, to jump Markov linear systems"
+---
+
+```{r include=FALSE}
+# automatically create a bib database for R packages
+knitr::write_bib(c(
+  .packages(), 'bookdown', 'knitr', 'rmarkdown'
+), 'packages.bib')
+```
