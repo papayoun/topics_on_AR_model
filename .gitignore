@@ -44,5 +44,11 @@ vignettes/*.pdf
 # R package: bookdown caching files
 /*_files/
 
+#
+_book/*.html
+_book/*.pdf
+_book/*.epub
+_book/*_files/
+
 # End of https://www.toptal.com/developers/gitignore/api/r
 
