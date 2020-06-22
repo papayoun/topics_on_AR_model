@@ -1,3 +1,8 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 # Switching autoregressive system
 
 In this chapter, we focus on a more complex system involving autoregressive structure. We still focus on a time series $y_0, \dots, y_n$ of values in $\mathbb{R}^d$. However, it is now supposed that the time series dynamics could change through time, according to an unobserved stochastic process in a discrete space. 
@@ -69,13 +74,31 @@ In this context, we focus on a different function, the *complete log-likelihood*
 &+ \sum_{t = 1}^n \log p(z_{t} \vert z_{t - 1}, \theta) + \sum_{t = 1}^n \log p(y_{t}\vert y_{t -1}, z_{t}, \theta)  (\#eq:AR-HMM-complete-log-likelihood).
 \end{align}
 
-For a given set of parameters, say $\theta^{(0)}$, let's consider the following function of $\theta$
+For a given set of parameters, say $\theta^{(0)}$, let's consider the following function of $\theta$:
+
+\begin{equation}
+Q(\theta \vert \theta^{(0)}) := \mathbb{E}[\ell(\theta \vert Y_{0:n}, Z_{0:n}) \vert Y_{0:n} = y_{0:n}, \theta^{(0)}] (\#eq:E-step-function).
+\end{equation}
+A first interesting property of this function is that, for a parameter, say, $\theta^{(1)}$:
+$$Q(\theta^{(1)} \vert \theta^{(0)}) \geq Q(\theta^{(0)} \vert \theta^{(0)}) \Rightarrow L(\theta^{(1)} \vert y_{0:n}) \geq L(\theta^{(0)} \vert y_{0:n}).$$
+This property naturally suggests an algorithm to obtain the MLE in this model:
+
+- **Initialization:** Given a set of observations $y_{0:n}$, set initial guess $\theta^{(0)}$
+- **Iteration:** For $k$ in $1,\dots, n$:
+    1. **E step**: Compute $Q(\theta \vert \theta^{(k-1)})$;
+    2. **M step**: Set $\theta^{(k)} = \text{argmax}_\theta Q(\theta \vert \theta^{(k-1)})$.
+
+It can be shown that the resulting sequence $\lbrace\theta^{(k)} \rbrace_{k \in \mathbb{N}}$ has a non decreasing set of likelihood values, and it converges towards a critical point (i.e., where the gradient of the likelihood is 0).
+
+In this section, one can ask what's the meaning of *computing* $Q(\theta \vert \theta^{(k-1)})$. 
+As this function of $\theta$ is an expectation with respect to a discrete distribution (the distribution of missing values conditionnally to the observations, under the parameter $\theta^{(k-1)}$), *computing* this function means to compute the related weights, that depends on the the observations and on $\theta^{(k-1)}$.
+
+Indeed, we have:
 
 \begin{align}
-Q(\theta \vert \theta_0) &:= \mathbb{E}[\ell(\theta \vert Y_{0:n}, Z_{0:n}) \vert Y_{0:n} = y_{0:n}, \theta^{(0)}] \nonumber\\ 
-&= \sum_{z_{0:n}} \ell(\theta \vert y_{0:n}, z_{0:n}) p(z_{0:n} \vert y_{0:n}, \theta^{(0)}) \text{d} z_{0:n} \nonumber \\
-&= \sum_{k = 1}^K \left(\log p(z_0 = k) + \log(p(y_0 \vert z_0 = k))\right) +
-\sum_{k = 1}^K \left(\log p(z_0 = k) + \log(p(y_0 \vert z_0 = k))\right) +
-\sum_{k = 1}^K\sum_{k' = 1}^K \sum_{t = 1}^n \log p(z_{t} \vert z_{t - 1}, \theta^{0})
-\ell(\theta \vert y_{0:n}, z_{0:n}) p(z_{0:n} \vert y_{0:n}, \theta^{(0)}) \text{d} z_{0:n} \nonumber
+Q(\theta \vert \theta_0) :=& \mathbb{E}[\ell(\theta \vert Y_{0:n}, Z_{0:n}) \vert Y_{0:n} = y_{0:n}, \theta^{(0)}]\nonumber \\
+=& \sum_{z_{0:n}} \ell(\theta \vert y_{0:n}, z_{0:n}) p(z_{0:n} \vert y_{0:n}, \theta^{(0)}) \text{d} z_{0:n} \nonumber \\
+=& \sum_{k = 1}^K p(z_0 = k \vert y_{0:n}, \theta^{(0)})\left(\log p(z_0 = k \vert \theta) + \log(p(y_0 \vert z_0 = k, \theta))\right)  \nonumber \\
+& + \sum_{k = 1}^K\sum_{k' = 1}^K \sum_{t = 1}^n p(z_{t-1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)}) \log p(z_{t} \vert z_{t - 1} \vert \theta) \nonumber \\
+& + \sum_{k = 1}^K \sum_{t = 1}^n p(z_t = k\vert y_{0:n}, \theta^{(0)}) \log p(y_{t} \vert z_{t} = k, \theta) \nonumber
 \end{align}
