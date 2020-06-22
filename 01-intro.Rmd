@@ -1,8 +1,0 @@
-# Introduction {#intro}
-
-This works gathers some notes about maximum likelihood inference in probabilistic model involving the well known Gaussian autoregressive process.
-
-The main motivation for this work was the inference aroung discretely observed integrated Ornstein Uhlenbeck process in movement ecology. 
-
-The book starts by describing this movement model in ecology and the different configurations relative to it. Then, succesive chapters build the different models by adding different bricks. 
-The objective is to show how the inference can be performed for each model.

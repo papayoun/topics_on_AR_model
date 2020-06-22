@@ -9,7 +9,7 @@ bookdown::gitbook:
     download: ["pdf", "epub"]
 bookdown::pdf_book:
   includes:
-    in_header: preamble.tex
+    in_header: ["preamble.tex", "header_IOU.tex"]
   citation_package: natbib
   keep_tex: yes
 bookdown::epub_book: default

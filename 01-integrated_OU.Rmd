@@ -1,0 +1,83 @@
+---
+output:
+  pdf_document: 
+    includes:
+      in_header: "header_IOU.tex"
+  html_document: default
+---
+
+# Integrated Ornstein-Uhlenbeck process
+
+## Notations
+
+In the following:
+
+* $I$ is the identity matrix whose dimension should be explicit in the concerned expression.
+* $\otimes$ is the Kronecker product;
+* For square matrices $A$ and $B$, $A \oplus B = A\otimes I + I \otimes B$ is the Kronecker sum;
+* For a matrix $A$, $\Vect A$ is the stack operator, i.e. the vectorization of $A$ by stacking its columns.
+\end{itemize}
+
+## Definition of the Integrated Ornstein Uhlenbeck process
+We consider here a stochastic process $\left\lbrace V_t, X_t \right\rbrace_{t \geq 0}$ taking values in $\mathbb{R}^{d}\times \mathbb{R}^{d}$ (typically, $d = 2$ in movement ecology), following an integrated Ornstein Uhlenbeck process.
+Formally, $\left\lbrace V_t \right\rbrace_{t \geq 0}$ is supposed to be the solution of a linear stochastic differential equation, and $\left\lbrace V_t, \right\rbrace_{t \geq 0}$ is its integration over time.
+This can be write in the following way: 
+\begin{equation}
+\begin{array}{rl}
+\rmd V_t &= -\Gamma \left( V_t - \mu \right)\rmd t + \Sigma \rmd W_t,~~V_0 = v_0\\
+X_t &= x_0 + \int_0^t V_s \rmd s
+\end{array}
+(\#eq:IOU-SDE)
+\end{equation}
+where $\mu$ is vector of $\mathbb{R}^d$, $\Gamma$ is a $d \times d$ invertible matrix, and $\Sigma$ is a $d \times d$ matrix such that $\Sigma\Sigma^T$ is symmetric and positive definite.
+
+This process is a Gaussian Markov process, such that for a positive time $t$.
+$$\begin{pmatrix}
+V_{t + \Delta}\\
+X_{t + \Delta}
+\end{pmatrix} \vert \begin{pmatrix}
+V_{t} \\
+X_{t}
+\end{pmatrix} \sim \mathcal{N}_{2d}\left( \begin{pmatrix}
+m^V(\Delta)\\
+m^X(\Delta)
+\end{pmatrix}, \begin{pmatrix}
+\Sigma(\Delta) = \begin{pmatrix}
+C^{V}(\Delta) & \left(C^{X, V}(\Delta)\right)^T\\
+C^{X, V}(\Delta) & C^{X}(\Delta)
+\end{pmatrix}
+\end{pmatrix} \right), $$
+where:
+\begin{align*}
+m^V(\Delta) &= \mu + \e^{-\Gamma \Delta} (V_t - \mu)\\
+m^X(\Delta) &= X_t + I\mu \Delta + (\Gamma\inv -  \e^{-\Gamma \Delta}\Gamma\inv)(V_t - \mu)\\
+ C^V(\Delta) &= \Sinf -\e^{-\Gamma \Delta}\Sinf \e^{-\Gamma^T \Delta}\\
+ C^{X,V}(\Delta) &= \Sinf \Gamma^{-T}\left(I - \e^{-\Gamma^T \Delta}\right) + \Gamma\inv\left(\e^{-\Gamma t} - I\right)\Sinf  \e^{-\Gamma^T t}\\
+ C^X(\Delta) &= \M \Delta - \left(I - \e^{-\Gamma^T \Delta}\right)\Gamma\inv \M - \M\Gamma^{-T}\left(I - \e^{-\Gamma \Delta}\right)+ \Gamma\inv \Sinf \Gamma^{-T} - 
+   \e^{-\Gamma \Delta}\Gamma\inv\Sinf\Gamma^{-T}\e^{-\Gamma^T \Delta},
+\end{align*}
+where $\Sinf$ is the matrix such that:
+ \begin{equation*}
+\Vect{\Sinf} = \GpG\inv\Vect{\Sigma \Sigma^T}, 
+\end{equation*}
+and $\M$ is the matrix:
+ \begin{equation*}
+\M= \Sinf\Gamma^{-T} + \Gamma\inv\Sinf.
+\end{equation*}
+
+## Link with the autoregressive process
+
+If we denote $Y_t = \begin{pmatrix}
+V_{t} \\
+X_{t}
+\end{pmatrix}$, one can see that:
+\begin{equation*}
+Y_{t + \Delta}\vert Y_t = m(\Delta) + \mathbf{A}(\Delta)  Y_t + E_t
+\end{equation*}
+where
+$$
+m(\Delta) = 
+\begin{matrix}
+(I - \e^{-\Gamma\Delta}) \mu\\
+(I - \Gamma\inv + \e^{-\Gamma\Delta})\mu
+\end{pmatrix}
