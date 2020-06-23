@@ -52,3 +52,4 @@ _book/*_files/
 
 # End of https://www.toptal.com/developers/gitignore/api/r
 
+.Rproj.user

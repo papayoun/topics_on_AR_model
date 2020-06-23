@@ -102,7 +102,7 @@ As this function of $\theta$ is an expectation with respect to a discrete distri
 Indeed, we have:
 
 \begin{align}
-Q(\theta \vert \theta_0) :=& \mathbb{E}[\ell(\theta \vert Y_{0:n}, Z_{0:n}) \vert Y_{0:n} = y_{0:n}, \theta^{(0)}]\nonumber \\
+Q(\theta \vert \theta^{(0)} :=& \mathbb{E}[\ell(\theta \vert Y_{0:n}, Z_{0:n}) \vert Y_{0:n} = y_{0:n}, \theta^{(0)}]\nonumber \\
 =& \sum_{z_{0:n}} \ell(\theta \vert y_{0:n}, z_{0:n}) p(z_{0:n} \vert y_{0:n}, \theta^{(0)}) \text{d} z_{0:n} \nonumber \\
 =& \sum_{k = 1}^K p(z_0 = k \vert y_{0:n}, \theta^{(0)})\left(\log p(z_0 = k \vert \theta) + \log(p(y_0 \vert z_0 = k, \theta))\right)  \nonumber \\
 & + \sum_{k = 1}^K\sum_{k' = 1}^K \sum_{t = 1}^n p(z_{t-1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)}) \log p(z_{t} = k' \vert z_{t - 1} = k,\theta) \nonumber \\
@@ -140,5 +140,43 @@ The key point here is the appearance of two key quantities, $\alpha_t(k) := p(y_
     - *Induction*: $$\alpha_t(k) = p(y_t\vert z_t, \theta^{(0)}) \sum_{j = 1}^K \alpha_{t - 1}(j) p(z_t = k\vert z_{t -1} = j, \theta^{(0)})$$
 * **Backward recursion**:
     - *Initialization*: $$\beta_n(k) = 1$$
-    - *Induction*: $$\beta_t(k) = \sum_{j = 1}^K p(z_{t + 1} = j \vert z_t = k,\theta^{(0)}) p(y_{t+1} \vert z_{t + 1} = j, \theta^{(0)}) \beta_{t+1}(j)$$
+    - *Induction*: $$\beta_t(k) = \sum_{j = 1}^K p(z_{t + 1} = j \vert z_t = k,\theta^{(0)}) p(y_{t+1} \vert z_{t + 1} = j, \theta^{(0)}) \beta_{t+1}(j).$$
+
+It thus remains to perform the M-step.
+
+### M step, weighted least square 
+
+The goal is now to maximize, with respect to $\theta$, the function:
+\begin{align*}
+Q(\theta \vert \theta^{(0)})&= \sum_{k = 1}^K p(z_0 = k \vert y_{0:n}, \theta^{(0)})\left(\log p(z_0 = k \vert \theta) + \log(p(y_0 \vert z_0 = k, \theta))\right)  \nonumber \\
+& + \sum_{k = 1}^K\sum_{k' = 1}^K \sum_{t = 1}^n p(z_{t-1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)}) \log p(z_{t} = k' \vert z_{t - 1} = k,\theta) \nonumber \\
+& + \sum_{k = 1}^K \sum_{t = 1}^n p(z_t = k\vert y_{0:n}, \theta^{(0)}) \log p(y_{t} \vert z_{t} = k, \theta), \nonumber
+\end{align*}
+where all terms that do not depend on $\theta$ are known.
+
+Here, again, we skip the estimation of the terms of $\theta$ related to initial distributions $\chi_{0,Z}$ and $\chi_{0, X}$, which can only be obtained when multiple trajectories (and then initial points) are observed.
+
+We thus focus on updating the transition matrix $\mathbf{P}_{ij},~1\leq i, j \leq K$ and dynamics parameters $\lbrace m(k), \mathbf{A}(k), \mathbf{\Sigma}(k)\rbrace_{k = 1,\dots, K}$.
+
+**Updating $\mathbf{P}$**
+
+We recall that $\mathbf{P}_{kk'} := p(z_{t} = k' \vert z_{t - 1} = k, \theta)$, which is a stochastic matrix, and then satisfies the $K$ constraints:
+$g(\mathbf{P}_{k\bullet}): = \sum_{k'=1}^K P_{kk'} = 1, 1\leq k \leq K$.
+Thus, maximizing $Q(\theta \vert \theta^{(0)})$ with respect to $\mathbf{P}$ only requires to focus on the terms
+$$\sum_{k' = 1}^K \sum_{t = 1}^ np(z_{t-1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)}) \log p(z_{t} = k' \vert z_{t - 1} = k,\theta) = \sum_{k = 1}^K\sum_{k' = 1}^K \sum_{t = 1}^p(z_{t-1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)}) \mathbf{P}_{k,k'} := f(\mathbf{P}_{k\bullet}).$$
+Using the Lagrange multiplier method, we want to solve the $K$ systems of $K + 1$ equations:
+\begin{align*}
+\nabla f(\mathbf{P}_{k\bullet}) &= \lambda \nabla g(\mathbf{P}_{k\bullet})\\
+g(\mathbf{P}_{k\bullet}) = 1,
+\end{align*}
+where $\nabla$ is the gradient operator, and $\lambda \in \mathbb{R}^*$ is called the Lagrange multiplier. In this case, we therefore have:
+\begin{align*}
+\frac{\sum_{t = 1}^n p(z_{t-1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)})}{\mathbf{P}_{k,k'}} &= \lambda \\
+\sum_{k' = 1}^K{\mathbf{P}_{kk'}} &= 1.
+\end{align*}
+This leads directly to:
+\begin{align*}
+\lambda &= \sum_{k' = 1}^K p(z_{t - 1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)}) \\
+\mathbf{P}_{kk'} &= \frac{p(z_{t - 1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)}) }{\sum_{k' = 1}^K p(z_{t - 1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)}) }
+\end{align*}
 

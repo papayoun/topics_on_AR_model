@@ -75,9 +75,10 @@ X_{t}
 Y_{t + \Delta}\vert Y_t = m(\Delta) + \mathbf{A}(\Delta)  Y_t + E_t
 \end{equation*}
 where
-$$
-m(\Delta) = 
-\begin{matrix}
-(I - \e^{-\Gamma\Delta}) \mu\\
-(I - \Gamma\inv + \e^{-\Gamma\Delta})\mu
-\end{pmatrix}
+<!-- $$ -->
+<!-- m(\Delta) =  -->
+<!-- \begin{matrix} -->
+<!-- (I - \e^{-\Gamma\Delta}) \mu\\ -->
+<!-- (I - \Gamma\inv + \e^{-\Gamma\Delta})\mu -->
+<!-- \end{pmatrix} -->
+<!-- $$ -->
