@@ -50,7 +50,7 @@ C^{X, V}(\Delta) & C^{X}(\Delta)
 where:
 \begin{align*}
 m^V(\Delta) &= \mu + \e^{-\Gamma \Delta} (V_t - \mu)\\
-m^X(\Delta) &= X_t + I\mu \Delta + (\Gamma\inv -  \e^{-\Gamma \Delta}\Gamma\inv)(V_t - \mu)\\
+m^X(\Delta) &= X_t + I\mu \Delta + \Gamma\inv(I -  \e^{-\Gamma \Delta})(V_t - \mu)\\
  C^V(\Delta) &= \Sinf -\e^{-\Gamma \Delta}\Sinf \e^{-\Gamma^T \Delta}\\
  C^{X,V}(\Delta) &= \Sinf \Gamma^{-T}\left(I - \e^{-\Gamma^T \Delta}\right) + \Gamma\inv\left(\e^{-\Gamma t} - I\right)\Sinf  \e^{-\Gamma^T t}\\
  C^X(\Delta) &= \M \Delta - \left(I - \e^{-\Gamma^T \Delta}\right)\Gamma\inv \M - \M\Gamma^{-T}\left(I - \e^{-\Gamma \Delta}\right)+ \Gamma\inv \Sinf \Gamma^{-T} - 

@@ -144,7 +144,7 @@ The key point here is the appearance of two key quantities, $\alpha_t(k) := p(y_
 
 It thus remains to perform the M-step.
 
-### M step, weighted least square 
+### M step, constrained optimization and weighted least square 
 
 The goal is now to maximize, with respect to $\theta$, the function:
 \begin{align*}
@@ -158,25 +158,40 @@ Here, again, we skip the estimation of the terms of $\theta$ related to initial 
 
 We thus focus on updating the transition matrix $\mathbf{P}_{ij},~1\leq i, j \leq K$ and dynamics parameters $\lbrace m(k), \mathbf{A}(k), \mathbf{\Sigma}(k)\rbrace_{k = 1,\dots, K}$.
 
-**Updating $\mathbf{P}$**
+### Updating $\mathbf{P}$ {-}
 
-We recall that $\mathbf{P}_{kk'} := p(z_{t} = k' \vert z_{t - 1} = k, \theta)$, which is a stochastic matrix, and then satisfies the $K$ constraints:
+We recall that $\mathbf{P} = \left \lbrace\mathbf{P}_{kk'} := p(z_{t} = k' \vert z_{t - 1} = k, \theta) \right\rbrace_{k,k' = 1,\dots, K}$. $\mathbf{P}$ is a stochastic matrix, and then satisfies the $K$ constraints:
 $g(\mathbf{P}_{k\bullet}): = \sum_{k'=1}^K P_{kk'} = 1, 1\leq k \leq K$.
 Thus, maximizing $Q(\theta \vert \theta^{(0)})$ with respect to $\mathbf{P}$ only requires to focus on the terms
-$$\sum_{k' = 1}^K \sum_{t = 1}^ np(z_{t-1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)}) \log p(z_{t} = k' \vert z_{t - 1} = k,\theta) = \sum_{k = 1}^K\sum_{k' = 1}^K \sum_{t = 1}^p(z_{t-1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)}) \mathbf{P}_{k,k'} := f(\mathbf{P}_{k\bullet}).$$
+$$\sum_{k' = 1}^K \sum_{t = 1}^ np(z_{t-1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)}) \log \mathbf{P}_{kk'} := f(\mathbf{P}_{k\bullet}).$$
 Using the Lagrange multiplier method, we want to solve the $K$ systems of $K + 1$ equations:
 \begin{align*}
-\nabla f(\mathbf{P}_{k\bullet}) &= \lambda \nabla g(\mathbf{P}_{k\bullet})\\
-g(\mathbf{P}_{k\bullet}) = 1,
+\nabla f(\mathbf{P}_{k\bullet}) &= \lambda_k \nabla g(\mathbf{P}_{k\bullet})\\
+g(\mathbf{P}_{k\bullet}) &= 1,
 \end{align*}
-where $\nabla$ is the gradient operator, and $\lambda \in \mathbb{R}^*$ is called the Lagrange multiplier. In this case, we therefore have:
+where $\nabla$ is the gradient operator, and $\lambda_k \in \mathbb{R}^*$ is called the Lagrange multiplier. In this case, we therefore have:
 \begin{align*}
-\frac{\sum_{t = 1}^n p(z_{t-1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)})}{\mathbf{P}_{k,k'}} &= \lambda \\
+\frac{\sum_{t = 1}^n p(z_{t-1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)})}{\mathbf{P}_{k,k'}} &= \lambda_k \\
 \sum_{k' = 1}^K{\mathbf{P}_{kk'}} &= 1.
 \end{align*}
 This leads directly to:
 \begin{align*}
-\lambda &= \sum_{k' = 1}^K p(z_{t - 1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)}) \\
-\mathbf{P}_{kk'} &= \frac{p(z_{t - 1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)}) }{\sum_{k' = 1}^K p(z_{t - 1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)}) }
+\lambda_k &= \sum_{t = 1}^n p(z_{t - 1} = k \vert y_{0:n}, \theta^{(0)}) \\
+\mathbf{P}_{kk'} &= \frac{\sum_{t = 1}^n p(z_{t - 1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)}) }{\sum_{t = 1}^n p(z_{t - 1} = k \vert y_{0:n}, \theta^{(0)})}
 \end{align*}
 
+### Updating dynamics parameters {-}
+
+For each $1\leq k \leq K$, our goal is to maximize the terms:
+$$\sum_{t = 1}^n p(z_t = k\vert y_{0:n}, \theta^{(0)}) \log p(y_{t} \vert z_{t} = k, \theta).$$
+One can recognize here that it is the same linear framework as  \@ref(eq:AR-simple) where a specific weight (the posterior probability of being in $k$ under $\theta^{(0)}$) would be assigned to each observation.
+In this context, maximizing in $\theta$ then results in $K$ weighted linear regressions. 
+
+For $1 \leq k\leq K$, updating 
+$\mathbf{B}(k) := \begin{pmatrix} m'(k)\\ \mathbf{A}(k) \end{pmatrix}$ is done using the weighted least square estimator:
+$$\widehat{\mathbf{B}}(k) = \left(\mathbf{X}'\mathbf{W}(k)\mathbf{X} \right)^{-1} \mathbf{X}'\mathbf{W}(k) \mathbf{Y},$$
+where 
+$$\mathbf{W}(k) = \begin{pmatrix}p(z_0 = k\vert y_{0:n}, \theta^{(0)}) & \cdots & 0 \\
+\vdots & \ddots & \vdots\\
+0 & \cdots & p(z_{n-1} = k\vert y_{0:n}, \theta^{(0)})
+\end{pmatrix}$$

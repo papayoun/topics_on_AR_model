@@ -84,7 +84,7 @@
 
 \title{Inference in multivariate autoregressive process and its extensions}
 \author{Pierre Gloaguen}
-\date{2020-06-23}
+\date{2020-07-08}
 
 \begin{document}
 \maketitle
@@ -255,8 +255,8 @@ and \(\hat{\mathbf{\Sigma}}\) is then obtained classicaly as:
 In this chapter, we focus on a more complex system involving autoregressive structure. We still focus on a time series \(y_0, \dots, y_n\) of values in \(\mathbb{R}^d\). However, it is now supposed that the time series dynamics could change through time, according to an unobserved stochastic process in a discrete space.
 This unobserved process might model different regimes of the dynamics (see \citet{rabiner1989tutorial} for selected applications).
 
-\hypertarget{model-1}{%
-\section{Model}\label{model-1}}
+\hypertarget{model}{%
+\section{Model}\label{model}}
 
 Taking the same notations and dimensions as in equation \eqref{eq:AR-simple}
 We assume that these observations are realisations of random variables \(Y_0,\dots, Y_n\) such that:
@@ -288,8 +288,8 @@ where
 In this context, the set of unknown parameters is given by
 \[\theta = \left\lbrace \mathbf{P}, m(k),~\mathbf{A}(k), \mathbf{\Sigma}\right \rbrace_{k = 1,\dots, K}.\]
 
-\hypertarget{inference-1}{%
-\section{Inference}\label{inference-1}}
+\hypertarget{inference}{%
+\section{Inference}\label{inference}}
 
 In this context, the inference task is twofold:
 
@@ -441,8 +441,8 @@ The key point here is the appearance of two key quantities, \(\alpha_t(k) := p(y
 
 It thus remains to perform the M-step.
 
-\hypertarget{m-step-weighted-least-square}{%
-\subsection{M step, weighted least square}\label{m-step-weighted-least-square}}
+\hypertarget{m-step-constrained-optimization-and-weighted-least-square}{%
+\subsection{M step, constrained optimization and weighted least square}\label{m-step-constrained-optimization-and-weighted-least-square}}
 
 The goal is now to maximize, with respect to \(\theta\), the function:
 \begin{align*}
@@ -456,22 +456,47 @@ Here, again, we skip the estimation of the terms of \(\theta\) related to initia
 
 We thus focus on updating the transition matrix \(\mathbf{P}_{ij},~1\leq i, j \leq K\) and dynamics parameters \(\lbrace m(k), \mathbf{A}(k), \mathbf{\Sigma}(k)\rbrace_{k = 1,\dots, K}\).
 
-\textbf{Updating \(\mathbf{P}\)}
+\hypertarget{updating-mathbfp}{%
+\subsection*{\texorpdfstring{Updating \(\mathbf{P}\)}{Updating \textbackslash{}mathbf\{P\}}}\label{updating-mathbfp}}
+\addcontentsline{toc}{subsection}{Updating \(\mathbf{P}\)}
 
-We recall that \(\mathbf{P}_{kk'} := p(z_{t} = k' \vert z_{t - 1} = k, \theta)\), which is a stochastic matrix, and then satisfies the \(K\) constraints:
+We recall that \(\mathbf{P} = \left \lbrace\mathbf{P}_{kk'} := p(z_{t} = k' \vert z_{t - 1} = k, \theta) \right\rbrace_{k,k' = 1,\dots, K}\). \(\mathbf{P}\) is a stochastic matrix, and then satisfies the \(K\) constraints:
 \(g(\mathbf{P}_{k\bullet}): = \sum_{k'=1}^K P_{kk'} = 1, 1\leq k \leq K\).
 Thus, maximizing \(Q(\theta \vert \theta^{(0)})\) with respect to \(\mathbf{P}\) only requires to focus on the terms
-\[\sum_{k' = 1}^K \sum_{t = 1}^ np(z_{t-1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)}) \log p(z_{t} = k' \vert z_{t - 1} = k,\theta) = \sum_{k = 1}^K\sum_{k' = 1}^K \sum_{t = 1}^p(z_{t-1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)}) \mathbf{P}_{k,k'} := f(\mathbf{P}_{k\bullet}).\]
+\[\sum_{k' = 1}^K \sum_{t = 1}^ np(z_{t-1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)}) \log \mathbf{P}_{kk'} := f(\mathbf{P}_{k\bullet}).\]
 Using the Lagrange multiplier method, we want to solve the \(K\) systems of \(K + 1\) equations:
 \begin{align*}
-\nabla f(\mathbf{P}_{k\bullet}) &= \lambda \nabla g(\mathbf{P}_{k\bullet})\\
-g(\mathbf{P}_{k\bullet}) = 1,
+\nabla f(\mathbf{P}_{k\bullet}) &= \lambda_k \nabla g(\mathbf{P}_{k\bullet})\\
+g(\mathbf{P}_{k\bullet}) &= 1,
 \end{align*}
-where \(\nabla\) is the gradient operator, and \(\lambda \in \mathbb{R}^*\) is called the Lagrange multiplier. In this case, we therefore have:
+where \(\nabla\) is the gradient operator, and \(\lambda_k \in \mathbb{R}^*\) is called the Lagrange multiplier. In this case, we therefore have:
 \begin{align*}
-\frac{(z_{t-1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)})}{\mathbf{P}_{k,k'}} &= \lambda \\
-\sum_{\mathbf{P}_{kk'}} &= 1.
+\frac{\sum_{t = 1}^n p(z_{t-1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)})}{\mathbf{P}_{k,k'}} &= \lambda_k \\
+\sum_{k' = 1}^K{\mathbf{P}_{kk'}} &= 1.
 \end{align*}
+This leads directly to:
+\begin{align*}
+\lambda_k &= \sum_{t = 1}^n p(z_{t - 1} = k \vert y_{0:n}, \theta^{(0)}) \\
+\mathbf{P}_{kk'} &= \frac{\sum_{t = 1}^n p(z_{t - 1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)}) }{\sum_{t = 1}^n p(z_{t - 1} = k \vert y_{0:n}, \theta^{(0)})}
+\end{align*}
+
+\hypertarget{updating-dynamics-parameters}{%
+\subsection*{Updating dynamics parameters}\label{updating-dynamics-parameters}}
+\addcontentsline{toc}{subsection}{Updating dynamics parameters}
+
+For each \(1\leq k \leq K\), our goal is to maximize the terms:
+\[\sum_{t = 1}^n p(z_t = k\vert y_{0:n}, \theta^{(0)}) \log p(y_{t} \vert z_{t} = k, \theta).\]
+One can recognize here that it is the same linear framework as \eqref{eq:AR-simple} where a specific weight (the posterior probability of being in \(k\) under \(\theta^{(0)}\)) would be assigned to each observation.
+In this context, maximizing in \(\theta\) then results in \(K\) weighted linear regressions.
+
+For \(1 \leq k\leq K\), updating
+\(\mathbf{B}(k) := \begin{pmatrix} m'(k)\\ \mathbf{A}(k) \end{pmatrix}\) is done using the weighted least square estimator:
+\[\widehat{\mathbf{B}}(k) = \left(\mathbf{X}'\mathbf{W}(k)\mathbf{X} \right)^{-1} \mathbf{X}'\mathbf{W}(k) \mathbf{Y},\]
+where
+\[\mathbf{W}(k) = \begin{pmatrix}p(z_0 = k\vert y_{0:n}, \theta^{(0)}) & \cdots & 0 \\
+\vdots & \ddots & \vdots\\
+0 & \cdots & p(z_{n-1} = k\vert y_{0:n}, \theta^{(0)})
+\end{pmatrix}\]
 
 \bibliography{book.bib,packages.bib}
 
