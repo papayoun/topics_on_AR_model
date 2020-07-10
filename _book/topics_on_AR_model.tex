@@ -1,6 +1,3 @@
-\PassOptionsToPackage{unicode=true}{hyperref} % options for packages loaded elsewhere
-\PassOptionsToPackage{hyphens}{url}
-%
 \documentclass[]{book}
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -9,9 +6,12 @@
 \ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
   \usepackage[T1]{fontenc}
   \usepackage[utf8]{inputenc}
-  \usepackage{textcomp} % provides euro and other symbols
 \else % if luatex or xelatex
-  \usepackage{unicode-math}
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
   \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
 \fi
 % use upquote if available, for straight quotes in verbatim environments
@@ -21,22 +21,19 @@
 \usepackage[]{microtype}
 \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
 }{}
-\IfFileExists{parskip.sty}{%
-\usepackage{parskip}
-}{% else
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{6pt plus 2pt minus 1pt}
-}
-\usepackage{hyperref}
+\PassOptionsToPackage{hyphens}{url} % url is loaded by hyperref
+\usepackage[unicode=true]{hyperref}
 \hypersetup{
             pdftitle={Inference in multivariate autoregressive process and its extensions},
             pdfauthor={Pierre Gloaguen},
             pdfborder={0 0 0},
             breaklinks=true}
 \urlstyle{same}  % don't use monospace font for urls
+\usepackage{natbib}
+\bibliographystyle{apalike}
 \usepackage{longtable,booktabs}
 % Fix footnotes in tables (requires footnote package)
-\IfFileExists{footnote.sty}{\usepackage{footnote}\makesavenoteenv{longtable}}{}
+\IfFileExists{footnote.sty}{\usepackage{footnote}\makesavenoteenv{long table}}{}
 \usepackage{graphicx,grffile}
 \makeatletter
 \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
@@ -46,6 +43,12 @@
 % margins by default, and it is still possible to overwrite the defaults
 % using explicit options in \includegraphics[width, height, ...]{}
 \setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
 \setlength{\emergencystretch}{3em}  % prevent overfull lines
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
@@ -79,12 +82,10 @@
 \newcommand{\Vect}[1]{\textbf{vec}\left(#1 \right)}
 \newcommand{\Sinf}{\mathbf{S}}
 \newcommand{\M}{\mathbf{M}}
-\usepackage[]{natbib}
-\bibliographystyle{apalike}
 
 \title{Inference in multivariate autoregressive process and its extensions}
 \author{Pierre Gloaguen}
-\date{2020-07-08}
+\date{2020-07-09}
 
 \begin{document}
 \maketitle
@@ -93,44 +94,56 @@
 \setcounter{tocdepth}{1}
 \tableofcontents
 }
-\hypertarget{about-these-notes}{%
-\chapter*{About these notes}\label{about-these-notes}}
+\chapter*{About these notes}\label{about-these-notes}
 \addcontentsline{toc}{chapter}{About these notes}
 
-This works gathers some notes about maximum likelihood inference in probabilistic model involving the well known Gaussian autoregressive process.
+This works gathers some notes about maximum likelihood inference in
+probabilistic model involving the well known Gaussian autoregressive
+process.
 
-The main motivation for this work was the inference aroung discretely observed integrated Ornstein Uhlenbeck process in movement ecology.
+The main motivation for this work was the inference aroung discretely
+observed integrated Ornstein Uhlenbeck process in movement ecology.
 
-The book starts by describing this movement model in ecology and the different configurations relative to it. Then, succesive chapters build the different models by adding different bricks.
-The objective is to show how the inference can be performed for each model.
+The book starts by describing this movement model in ecology and the
+different configurations relative to it. Then, succesive chapters build
+the different models by adding different bricks. The objective is to
+show how the inference can be performed for each model.
 
-\hypertarget{integrated-ornstein-uhlenbeck-process}{%
-\chapter{Integrated Ornstein-Uhlenbeck process}\label{integrated-ornstein-uhlenbeck-process}}
+\chapter{Integrated Ornstein-Uhlenbeck
+process}\label{integrated-ornstein-uhlenbeck-process}
 
-\hypertarget{notations}{%
-\section{Notations}\label{notations}}
+\section{Notations}\label{notations}
 
 In the following:
 
 \begin{itemize}
 \tightlist
 \item
-  \(I\) is the identity matrix whose dimension should be explicit in the concerned expression.
+  \(I\) is the identity matrix whose dimension should be explicit in the
+  concerned expression.
 \item
   \(\otimes\) is the Kronecker product;
 \item
-  For square matrices \(A\) and \(B\), \(A \oplus B = A\otimes I + I \otimes B\) is the Kronecker sum;
+  For square matrices \(A\) and \(B\),
+  \(A \oplus B = A\otimes I + I \otimes B\) is the Kronecker sum;
 \item
-  For a matrix \(A\), \(\Vect A\) is the stack operator, i.e.~the vectorization of \(A\) by stacking its columns.
+  For a matrix \(A\), \(\Vect A\) is the stack operator, i.e.~the
+  vectorization of \(A\) by stacking its columns.
   \textbackslash{}end\{itemize\}
 \end{itemize}
 
-\hypertarget{definition-of-the-integrated-ornstein-uhlenbeck-process}{%
-\section{Definition of the Integrated Ornstein Uhlenbeck process}\label{definition-of-the-integrated-ornstein-uhlenbeck-process}}
+\section{Definition of the Integrated Ornstein Uhlenbeck
+process}\label{definition-of-the-integrated-ornstein-uhlenbeck-process}
 
-We consider here a stochastic process \(\left\lbrace V_t, X_t \right\rbrace_{t \geq 0}\) taking values in \(\mathbb{R}^{d}\times \mathbb{R}^{d}\) (typically, \(d = 2\) in movement ecology), following an integrated Ornstein Uhlenbeck process.
-Formally, \(\left\lbrace V_t \right\rbrace_{t \geq 0}\) is supposed to be the solution of a linear stochastic differential equation, and \(\left\lbrace V_t, \right\rbrace_{t \geq 0}\) is its integration over time.
-This can be write in the following way:
+We consider here a stochastic process
+\(\left\lbrace V_t, X_t \right\rbrace_{t \geq 0}\) taking values in
+\(\mathbb{R}^{d}\times \mathbb{R}^{d}\) (typically, \(d = 2\) in
+movement ecology), following an integrated Ornstein Uhlenbeck process.
+Formally, \(\left\lbrace V_t \right\rbrace_{t \geq 0}\) is supposed to
+be the solution of a linear stochastic differential equation, and
+\(\left\lbrace V_t, \right\rbrace_{t \geq 0}\) is its integration over
+time. This can be write in the following way:
+
 \begin{equation}
 \begin{array}{rl}
 \rmd V_t &= -\Gamma \left( V_t - \mu \right)\rmd t + \Sigma \rmd W_t,~~V_0 = v_0\\
@@ -138,10 +151,13 @@ X_t &= x_0 + \int_0^t V_s \rmd s
 \end{array}
 \label{eq:IOU-SDE}
 \end{equation}
-where \(\mu\) is vector of \(\mathbb{R}^d\), \(\Gamma\) is a \(d \times d\) invertible matrix, and \(\Sigma\) is a \(d \times d\) matrix such that \(\Sigma\Sigma^T\) is symmetric and positive definite.
 
-This process is a Gaussian Markov process, such that for a positive time \(t\).
-\[\begin{pmatrix}
+where \(\mu\) is vector of \(\mathbb{R}^d\), \(\Gamma\) is a
+\(d \times d\) invertible matrix, and \(\Sigma\) is a \(d \times d\)
+matrix such that \(\Sigma\Sigma^T\) is symmetric and positive definite.
+
+This process is a Gaussian Markov process, such that for a positive time
+\(t\). \[\begin{pmatrix}
 V_{t + \Delta}\\
 X_{t + \Delta}
 \end{pmatrix} \vert \begin{pmatrix}
@@ -155,66 +171,81 @@ m^X(\Delta)
 C^{V}(\Delta) & \left(C^{X, V}(\Delta)\right)^T\\
 C^{X, V}(\Delta) & C^{X}(\Delta)
 \end{pmatrix}
-\end{pmatrix} \right), \]
-where:
+\end{pmatrix} \right), \] where:
+
 \begin{align*}
 m^V(\Delta) &= \mu + \e^{-\Gamma \Delta} (V_t - \mu)\\
-m^X(\Delta) &= X_t + I\mu \Delta + (\Gamma\inv -  \e^{-\Gamma \Delta}\Gamma\inv)(V_t - \mu)\\
+m^X(\Delta) &= X_t + I\mu \Delta + \Gamma\inv(I -  \e^{-\Gamma \Delta})(V_t - \mu)\\
  C^V(\Delta) &= \Sinf -\e^{-\Gamma \Delta}\Sinf \e^{-\Gamma^T \Delta}\\
  C^{X,V}(\Delta) &= \Sinf \Gamma^{-T}\left(I - \e^{-\Gamma^T \Delta}\right) + \Gamma\inv\left(\e^{-\Gamma t} - I\right)\Sinf  \e^{-\Gamma^T t}\\
  C^X(\Delta) &= \M \Delta - \left(I - \e^{-\Gamma^T \Delta}\right)\Gamma\inv \M - \M\Gamma^{-T}\left(I - \e^{-\Gamma \Delta}\right)+ \Gamma\inv \Sinf \Gamma^{-T} - 
    \e^{-\Gamma \Delta}\Gamma\inv\Sinf\Gamma^{-T}\e^{-\Gamma^T \Delta},
 \end{align*}
+
 where \(\Sinf\) is the matrix such that:
+
 \begin{equation*}
 \Vect{\Sinf} = \GpG\inv\Vect{\Sigma \Sigma^T}, 
 \end{equation*}
+
 and \(\M\) is the matrix:
+
 \begin{equation*}
 \M= \Sinf\Gamma^{-T} + \Gamma\inv\Sinf.
 \end{equation*}
 
-\hypertarget{link-with-the-autoregressive-process}{%
-\section{Link with the autoregressive process}\label{link-with-the-autoregressive-process}}
+\section{Link with the autoregressive
+process}\label{link-with-the-autoregressive-process}
 
-If we denote \(Y_t = \begin{pmatrix} V_{t} \\ X_{t} \end{pmatrix}\), one can see that:
+If we denote \(Y_t = \begin{pmatrix} V_{t} \\ X_{t} \end{pmatrix}\), one
+can see that:
+
 \begin{equation*}
 Y_{t + \Delta}\vert Y_t = m(\Delta) + \mathbf{A}(\Delta)  Y_t + E_t
 \end{equation*}
+
 where
 
-\hypertarget{simpleAR}{%
-\chapter{Multivariate autoregressive model}\label{simpleAR}}
+\chapter{Multivariate autoregressive model}\label{simpleAR}
 
-In this chapter, we focus on the case where observations consist in a multivariate time series \(y_0, \dots, y_n\) such that for any \(0\leq t \leq n\), \(y_t \in \mathbb{R}^d\), we denote:
-\[y_t = 
+In this chapter, we focus on the case where observations consist in a
+multivariate time series \(y_0, \dots, y_n\) such that for any
+\(0\leq t \leq n\), \(y_t \in \mathbb{R}^d\), we denote: \[y_t = 
 \begin{pmatrix}
 y_{t,1}\\
 \vdots\\
 y_{t, d}
 \end{pmatrix}\]
 
-\hypertarget{model}{%
-\section{Model}\label{model}}
+\section{Model}\label{model}
 
-We assume that these observations are realisations of random variables \(Y_0,\dots, Y_n\) such that:
+We assume that these observations are realisations of random variables
+\(Y_0,\dots, Y_n\) such that:
+
 \begin{align}
 Y_0 &\sim \chi_0(\cdot),\nonumber \\
 Y_t &= m + \mathbf{A}Y_{t -1} + E_t,~1\leq t \leq n \label{eq:AR-simple}
 \end{align}
-where \(\chi_0\) is some probability distribution over \(\mathbb{R}^d\), \(m\in\mathbb{R}^d\) and \(\mathbf{A}\in \mathcal{M}_{d\times d}\) are parameters, \(E_t\) is a \(d-\)dimensionnal vector such that:
+
+where \(\chi_0\) is some probability distribution over \(\mathbb{R}^d\),
+\(m\in\mathbb{R}^d\) and \(\mathbf{A}\in \mathcal{M}_{d\times d}\) are
+parameters, \(E_t\) is a \(d-\)dimensionnal vector such that:
+
 \begin{equation*}
 E_t \overset{ind.}{\sim} \mathcal{N}\left(0, \mathbf{\Sigma}\right).
 \end{equation*}
 
-\hypertarget{inference}{%
-\section{Inference}\label{inference}}
+\section{Inference}\label{inference}
 
-In this simple context, inference consists in finding the maximum likelihood estimates of unknown parameters\footnote{In the case where multiple time series are observed, unknown parameters for the initial distribution $\chi_0(\cdot)$ could be considered} \(\hat{m}\), \(\hat{\mathbf{A}}\) and \(\mathbf{\Sigma}\).
+In this simple context, inference consists in finding the maximum
+likelihood estimates of unknown
+parameters\footnote{In the case where multiple time series are observed, unknown parameters for the initial distribution $\chi_0(\cdot)$ could be considered}
+\(\hat{m}\), \(\hat{\mathbf{A}}\) and \(\mathbf{\Sigma}\).
 
-Inference is straightforward here as we can recognize in \eqref{eq:AR-simple} a multivariate linear model:
-\[\mathbf{Y} = \mathbf{XB} + \mathbf{E},\]
-where
+Inference is straightforward here as we can recognize in
+\eqref{eq:AR-simple} a multivariate linear model:
+\[\mathbf{Y} = \mathbf{XB} + \mathbf{E},\] where
+
 \begin{align*}
 \mathbf{Y} &= 
 \begin{pmatrix}
@@ -240,56 +271,77 @@ E_1'\\
 E_n'
 \end{pmatrix} \in \mathcal{M}_{n \times d}.
 \end{align*}
-Thus, \(\hat{m}\) and \(\hat{\mathbf{A}}\) can be obtained using the classical estimate
+
+Thus, \(\hat{m}\) and \(\hat{\mathbf{A}}\) can be obtained using the
+classical estimate
+
 \begin{equation}
 \hat{\mathbf{B}} = \left(\mathbf{X'X}\right)^{-1}\mathbf{X}'\mathbf{Y}, \label{eq:AR-simple-B-hat}
 \end{equation}
+
 and \(\hat{\mathbf{\Sigma}}\) is then obtained classicaly as:
+
 \begin{equation}
 \hat{\mathbf{\Sigma}} = \frac{1}{n} \sum_{t = 1}^n \left(Y_t - \hat{m} - \hat{\mathbf{A}} Y_{t - 1}\right) \left(Y_t - \hat{m} - \hat{\mathbf{A}} Y_{t - 1}\right)' \label{eq:AR-simple-Sigma-hat}
 \end{equation}
 
-\hypertarget{switching-autoregressive-system}{%
-\chapter{Switching autoregressive system}\label{switching-autoregressive-system}}
+\chapter{Switching autoregressive
+system}\label{switching-autoregressive-system}
 
-In this chapter, we focus on a more complex system involving autoregressive structure. We still focus on a time series \(y_0, \dots, y_n\) of values in \(\mathbb{R}^d\). However, it is now supposed that the time series dynamics could change through time, according to an unobserved stochastic process in a discrete space.
-This unobserved process might model different regimes of the dynamics (see \citet{rabiner1989tutorial} for selected applications).
+In this chapter, we focus on a more complex system involving
+autoregressive structure. We still focus on a time series
+\(y_0, \dots, y_n\) of values in \(\mathbb{R}^d\). However, it is now
+supposed that the time series dynamics could change through time,
+according to an unobserved stochastic process in a discrete space. This
+unobserved process might model different regimes of the dynamics (see
+\citet{rabiner1989tutorial} for selected applications).
 
-\hypertarget{model}{%
-\section{Model}\label{model}}
+\section{Model}\label{model}
 
-Taking the same notations and dimensions as in equation \eqref{eq:AR-simple}
-We assume that these observations are realisations of random variables \(Y_0,\dots, Y_n\) such that:
+Taking the same notations and dimensions as in equation
+\eqref{eq:AR-simple} We assume that these observations are realisations of
+random variables \(Y_0,\dots, Y_n\) such that:
+
 \begin{align*}
 Z_0 &\sim \chi_{0, Z}(\cdot)\\
 Z_t \vert Z_{t - 1} &\sim p(z_t \vert Z_{t - 1}) \\
 Y_0 &\sim \chi_{0, Y}(\cdot \vert Z_0), \\
 Y_t \vert Z_t &= m(Z_t) + \mathbf{A}(Z_t)Y_{t -1} + E_t,~1\leq t \leq n 
 \end{align*}
+
 where
 
 \begin{itemize}
 \tightlist
 \item
-  \(\left\lbrace Z_t \right\rbrace_{0\leq t \leq n}\) is an homogeneous Markov chain taking value on the finite space \(\mathbb{K} = \lbrace1,\dots, K \rbrace\), and of transition matrix denoted by \(\mathbf{P}\),
+  \(\left\lbrace Z_t \right\rbrace_{0\leq t \leq n}\) is an homogeneous
+  Markov chain taking value on the finite space
+  \(\mathbb{K} = \lbrace1,\dots, K \rbrace\), and of transition matrix
+  denoted by \(\mathbf{P}\),
 \item
-  \(\lbrace m(k)\in\mathbb{R}^d,~\mathbf{A}(k)\in \mathcal{M}_{d\times d}\rbrace_{k = 1,\dots, K}\) are unknown parameters.
+  \(\lbrace m(k)\in\mathbb{R}^d,~\mathbf{A}(k)\in \mathcal{M}_{d\times d}\rbrace_{k = 1,\dots, K}\)
+  are unknown parameters.
 \item
-  \(\chi_{0, Z}(\cdot)\) and \(\chi_{0, Y}(\cdot \vert Z_0)\) are some probability distributions over \(\mathbb{K}\) and \(\mathbb{R}^d\)
+  \(\chi_{0, Z}(\cdot)\) and \(\chi_{0, Y}(\cdot \vert Z_0)\) are some
+  probability distributions over \(\mathbb{K}\) and \(\mathbb{R}^d\)
 \item
-  \(p(z_t\vert Z_{t-1})\) is the law of \(Z_t\) condtionnally to \(Z_{t - 1}\) (here the line of \(\mathbf{P}\) given by \(Z_{t - 1}\)).
+  \(p(z_t\vert Z_{t-1})\) is the law of \(Z_t\) condtionnally to
+  \(Z_{t - 1}\) (here the line of \(\mathbf{P}\) given by
+  \(Z_{t - 1}\)).
 \item
   \(E_t\) is a random vector such that:
+
   \begin{equation*}
   E_t \overset{ind.}{\sim} \mathcal{N}\left(0, \mathbf{\Sigma}\right).
-  \end{equation*} where \(\mathbf{\Sigma}\) is \(d\times d\) covariance matrix.
+  \end{equation*}
+
+  where \(\mathbf{\Sigma}\) is \(d\times d\) covariance matrix.
 \end{itemize}
 
 In this context, the set of unknown parameters is given by
 \[\theta = \left\lbrace \mathbf{P}, m(k),~\mathbf{A}(k), \mathbf{\Sigma}\right \rbrace_{k = 1,\dots, K}.\]
 
-\hypertarget{inference}{%
-\section{Inference}\label{inference}}
+\section{Inference}\label{inference}
 
 In this context, the inference task is twofold:
 
@@ -299,39 +351,50 @@ In this context, the inference task is twofold:
 \item
   Obtaining maximum likelihood estimate of \(\theta\);
 \item
-  Retracing the hidden sequence \(Z_0,\dots Z_n\) given the observations \(Y_{0:n}\).
+  Retracing the hidden sequence \(Z_0,\dots Z_n\) given the observations
+  \(Y_{0:n}\).
 \end{enumerate}
 
-It is well known that these two tasks are indeed complementary.
-A common way to solve these problems is the Expectation Maximization (EM) algorithm
-\citep{dempster1977maximum}.
-The algorithm is shortly depicted here.
+It is well known that these two tasks are indeed complementary. A common
+way to solve these problems is the Expectation Maximization (EM)
+algorithm \citep{dempster1977maximum}. The algorithm is shortly depicted
+here.
 
-\hypertarget{comment-about-notations}{%
-\subsection*{Comment about notations}\label{comment-about-notations}}
+\subsection*{Comment about notations}\label{comment-about-notations}
 \addcontentsline{toc}{subsection}{Comment about notations}
 
-In the following, we use the notation \(p\) for a generic probability distribution. The law to which it refers is explicit through arguments. For instance \(p(y_{0:n} \vert z_{0:n})\) is the p.d.f. of a Gaussian vector, the random vector \(Y_{0:n}\vert Z_{0:n}\), and \(p(z_t\vert z_{t - 1})\) is the law of the discrete random variable \(Z_{t} \vert Z_{t - 1}\) evaluated at \(z_t\) and \(z_{t -1}\).
-In this context, \(p(z_t\vert z_{t - 1}) = \mathbb{P}(Z_t = z_t \vert \lbrace Z_{t-1} = z_{t -1}\rbrace.\)
+In the following, we use the notation \(p\) for a generic probability
+distribution. The law to which it refers is explicit through arguments.
+For instance \(p(y_{0:n} \vert z_{0:n})\) is the p.d.f. of a Gaussian
+vector, the random vector \(Y_{0:n}\vert Z_{0:n}\), and
+\(p(z_t\vert z_{t - 1})\) is the law of the discrete random variable
+\(Z_{t} \vert Z_{t - 1}\) evaluated at \(z_t\) and \(z_{t -1}\). In this
+context,
+\(p(z_t\vert z_{t - 1}) = \mathbb{P}(Z_t = z_t \vert \lbrace Z_{t-1} = z_{t -1}\rbrace.\)
 
-\hypertarget{likelihood}{%
-\subsection{Likelihood}\label{likelihood}}
+\subsection{Likelihood}\label{likelihood}
 
-A straightforward way to compute the likelihood in this model can be obtained, just using the Markov properties of this model:
+A straightforward way to compute the likelihood in this model can be
+obtained, just using the Markov properties of this model:
+
 \begin{align}
 L(\theta \vert y_{0:n}) &:= p(y_{0:n} \vert \theta) \nonumber \\
 &= \sum_{z_{0:n}} p(y_{0:n}, z_{0:n}) \nonumber \\
 &= \sum_{z_{0:n}} p(z_{0:n})p(y_{0:n}\vert z_{0:n}) \nonumber \\
 &=  \sum_{z_{0:n}} p(z_0 \vert \theta) p(y_0\vert z_0, \theta) \prod_{t = 1}^n p(z_{t} \vert z_{t - 1}, \theta)p(y_{t}\vert y_{t -1}, z_{t}, \theta)  \label{eq:AR-HMM-likelihood}.
 \end{align}
-For a known \(\theta\), every term in \eqref{eq:AR-HMM-likelihood} can be computed.
-However, in a general setting, there exists \(K^{n + 1}\) possible sequences \(z_{0:n}\), which makes this direct computation hardly feasible for any common values of \(n\).
 
-\hypertarget{complete-log-likelihood}{%
-\subsection{Complete log-likelihood}\label{complete-log-likelihood}}
+For a known \(\theta\), every term in \eqref{eq:AR-HMM-likelihood} can be
+computed. However, in a general setting, there exists \(K^{n + 1}\)
+possible sequences \(z_{0:n}\), which makes this direct computation
+hardly feasible for any common values of \(n\).
 
-In the context of missing data problems, an important function is the \emph{complete log-likelihood}, i.e.~the likelihood of the \emph{completed} observations (what we wish we could observe), \((y_{0:n}, z_{0:n})\).
-We have that:
+\subsection{Complete log-likelihood}\label{complete-log-likelihood}
+
+In the context of missing data problems, an important function is the
+\emph{complete log-likelihood}, i.e.~the likelihood of the
+\emph{completed} observations (what we wish we could observe),
+\((y_{0:n}, z_{0:n})\). We have that:
 
 \begin{align}
 \ell(\theta \vert y_{0:n}, z_{0:n}) :=& \log p(y_{0:n}, z_{0:n} \vert \theta) \nonumber \\
@@ -341,25 +404,31 @@ We have that:
 &+ \sum_{t = 1}^n \log p(z_{t} \vert z_{t - 1}, \theta) + \sum_{t = 1}^n \log p(y_{t}\vert y_{t -1}, z_{t}, \theta)  \label{eq:AR-HMM-complete-log-likelihood}.
 \end{align}
 
-We emphasize here that, if the hidden states were known, this complete log-likelihood can could easily be computed.
+We emphasize here that, if the hidden states were known, this complete
+log-likelihood can could easily be computed.
 
-\hypertarget{expectation-maximization-algorithm}{%
-\subsection{Expectation-Maximization algorithm}\label{expectation-maximization-algorithm}}
+\subsection{Expectation-Maximization
+algorithm}\label{expectation-maximization-algorithm}
 
-A workaround to find the maximum likelihood estimate in this context is the EM algorithm.
-For a given set of parameters, say \(\theta^{(0)}\), let's consider the following function of \(\theta\):
+A workaround to find the maximum likelihood estimate in this context is
+the EM algorithm. For a given set of parameters, say \(\theta^{(0)}\),
+let's consider the following function of \(\theta\):
 
 \begin{equation}
 Q(\theta \vert \theta^{(0)}) := \mathbb{E}[\ell(\theta \vert Y_{0:n}, Z_{0:n}) \vert Y_{0:n} = y_{0:n}, \theta^{(0)}] \label{eq:E-step-function}.
 \end{equation}
-A first interesting property of this function is that, for a parameter, say, \(\theta^{(1)}\):
+
+A first interesting property of this function is that, for a parameter,
+say, \(\theta^{(1)}\):
 \[Q(\theta^{(1)} \vert \theta^{(0)}) \geq Q(\theta^{(0)} \vert \theta^{(0)}) \Rightarrow L(\theta^{(1)} \vert y_{0:n}) \geq L(\theta^{(0)} \vert y_{0:n}).\]
-This property naturally suggests an algorithm to obtain the MLE in this model:
+This property naturally suggests an algorithm to obtain the MLE in this
+model:
 
 \begin{itemize}
 \tightlist
 \item
-  \textbf{Initialization:} Given a set of observations \(y_{0:n}\), set initial guess \(\theta^{(0)}\)
+  \textbf{Initialization:} Given a set of observations \(y_{0:n}\), set
+  initial guess \(\theta^{(0)}\)
 \item
   \textbf{Iteration:} For \(k\) in \(1,\dots, n\):
 
@@ -369,14 +438,23 @@ This property naturally suggests an algorithm to obtain the MLE in this model:
   \item
     \textbf{E step}: Compute \(Q(\theta \vert \theta^{(k-1)})\);
   \item
-    \textbf{M step}: Set \(\theta^{(k)} = \text{argmax}_\theta Q(\theta \vert \theta^{(k-1)})\).
+    \textbf{M step}: Set
+    \(\theta^{(k)} = \text{argmax}_\theta Q(\theta \vert \theta^{(k-1)})\).
   \end{enumerate}
 \end{itemize}
 
-It can be shown that the resulting sequence \(\lbrace\theta^{(k)} \rbrace_{k \in \mathbb{N}}\) has a non decreasing set of likelihood values, and it converges towards a critical point (i.e., where the gradient of the likelihood is 0).
+It can be shown that the resulting sequence
+\(\lbrace\theta^{(k)} \rbrace_{k \in \mathbb{N}}\) has a non decreasing
+set of likelihood values, and it converges towards a critical point
+(i.e., where the gradient of the likelihood is 0).
 
-In this section, one can ask what's the meaning of \emph{computing} \(Q(\theta \vert \theta^{(k-1)})\).
-As this function of \(\theta\) is an expectation with respect to a discrete distribution (the distribution of missing values conditionnally to the observations, under the parameter \(\theta^{(k-1)}\)), \emph{computing} this function means to compute the related weights, that depends on the the observations and on \(\theta^{(k-1)}\).
+In this section, one can ask what's the meaning of \emph{computing}
+\(Q(\theta \vert \theta^{(k-1)})\). As this function of \(\theta\) is an
+expectation with respect to a discrete distribution (the distribution of
+missing values conditionnally to the observations, under the parameter
+\(\theta^{(k-1)}\)), \emph{computing} this function means to compute the
+related weights, that depends on the the observations and on
+\(\theta^{(k-1)}\).
 
 Indeed, we have:
 
@@ -388,10 +466,11 @@ Q(\theta \vert \theta^{(0)} :=& \mathbb{E}[\ell(\theta \vert Y_{0:n}, Z_{0:n}) \
 & + \sum_{k = 1}^K \sum_{t = 1}^n p(z_t = k\vert y_{0:n}, \theta^{(0)}) \log p(y_{t} \vert z_{t} = k, \theta) \nonumber
 \end{align}
 
-\hypertarget{e-step-the-baum-welch-smoothing-algorithm}{%
-\subsection{E step, the Baum-Welch smoothing algorithm}\label{e-step-the-baum-welch-smoothing-algorithm}}
+\subsection{E step, the Baum-Welch smoothing
+algorithm}\label{e-step-the-baum-welch-smoothing-algorithm}
 
-The E step requires to compute \(p(z_t = k \vert y_{0:n}, \theta^{(0)})\) and
+The E step requires to compute
+\(p(z_t = k \vert y_{0:n}, \theta^{(0)})\) and
 \(p(z_{t - 1} = k, z_{t} = k' \vert y_{0:n}, \theta^{(0)})\).
 
 This is done in an twofold iterative way using the fact that:
@@ -413,7 +492,10 @@ p(y_{0:{n - 1}}, z_{n -1} \vert{\theta^{(0)}}) p(z_{n} \vert z_{n -1}, \theta^{(
 \right.
 \end{align*}
 
-The key point here is the appearance of two key quantities, \(\alpha_t(k) := p(y_{0:{t}}, z_{t} = k \vert{\theta^{(0)}})\) and \(\beta_{t}(k) := p(y_{(t+1):n}\vert z_{t} = k, \theta^{(0)})\). To compute these quantities, one can use the following recursions:
+The key point here is the appearance of two key quantities,
+\(\alpha_t(k) := p(y_{0:{t}}, z_{t} = k \vert{\theta^{(0)}})\) and
+\(\beta_{t}(k) := p(y_{(t+1):n}\vert z_{t} = k, \theta^{(0)})\). To
+compute these quantities, one can use the following recursions:
 
 \begin{itemize}
 \tightlist
@@ -423,9 +505,11 @@ The key point here is the appearance of two key quantities, \(\alpha_t(k) := p(y
   \begin{itemize}
   \tightlist
   \item
-    \emph{Initialization}: \[\alpha_0(k) = p(z_0 \vert \theta^{(0)}) p(y_0\vert z_0, \theta^{(0)})\]
+    \emph{Initialization}:
+    \[\alpha_0(k) = p(z_0 \vert \theta^{(0)}) p(y_0\vert z_0, \theta^{(0)})\]
   \item
-    \emph{Induction}: \[\alpha_t(k) = p(y_t\vert z_t, \theta^{(0)}) \sum_{j = 1}^K \alpha_{t - 1}(j) p(z_t = k\vert z_{t -1} = j, \theta^{(0)})\]
+    \emph{Induction}:
+    \[\alpha_t(k) = p(y_t\vert z_t, \theta^{(0)}) \sum_{j = 1}^K \alpha_{t - 1}(j) p(z_t = k\vert z_{t -1} = j, \theta^{(0)})\]
   \end{itemize}
 \item
   \textbf{Backward recursion}:
@@ -435,62 +519,86 @@ The key point here is the appearance of two key quantities, \(\alpha_t(k) := p(y
   \item
     \emph{Initialization}: \[\beta_n(k) = 1\]
   \item
-    \emph{Induction}: \[\beta_t(k) = \sum_{j = 1}^K p(z_{t + 1} = j \vert z_t = k,\theta^{(0)}) p(y_{t+1} \vert z_{t + 1} = j, \theta^{(0)}) \beta_{t+1}(j).\]
+    \emph{Induction}:
+    \[\beta_t(k) = \sum_{j = 1}^K p(z_{t + 1} = j \vert z_t = k,\theta^{(0)}) p(y_{t+1} \vert z_{t + 1} = j, \theta^{(0)}) \beta_{t+1}(j).\]
   \end{itemize}
 \end{itemize}
 
 It thus remains to perform the M-step.
 
-\hypertarget{m-step-constrained-optimization-and-weighted-least-square}{%
-\subsection{M step, constrained optimization and weighted least square}\label{m-step-constrained-optimization-and-weighted-least-square}}
+\subsection{M step, constrained optimization and weighted least
+square}\label{m-step-constrained-optimization-and-weighted-least-square}
 
 The goal is now to maximize, with respect to \(\theta\), the function:
+
 \begin{align*}
 Q(\theta \vert \theta^{(0)})&= \sum_{k = 1}^K p(z_0 = k \vert y_{0:n}, \theta^{(0)})\left(\log p(z_0 = k \vert \theta) + \log(p(y_0 \vert z_0 = k, \theta))\right)  \nonumber \\
 & + \sum_{k = 1}^K\sum_{k' = 1}^K \sum_{t = 1}^n p(z_{t-1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)}) \log p(z_{t} = k' \vert z_{t - 1} = k,\theta) \nonumber \\
 & + \sum_{k = 1}^K \sum_{t = 1}^n p(z_t = k\vert y_{0:n}, \theta^{(0)}) \log p(y_{t} \vert z_{t} = k, \theta), \nonumber
 \end{align*}
+
 where all terms that do not depend on \(\theta\) are known.
 
-Here, again, we skip the estimation of the terms of \(\theta\) related to initial distributions \(\chi_{0,Z}\) and \(\chi_{0, X}\), which can only be obtained when multiple trajectories (and then initial points) are observed.
+Here, again, we skip the estimation of the terms of \(\theta\) related
+to initial distributions \(\chi_{0,Z}\) and \(\chi_{0, X}\), which can
+only be obtained when multiple trajectories (and then initial points)
+are observed.
 
-We thus focus on updating the transition matrix \(\mathbf{P}_{ij},~1\leq i, j \leq K\) and dynamics parameters \(\lbrace m(k), \mathbf{A}(k), \mathbf{\Sigma}(k)\rbrace_{k = 1,\dots, K}\).
+We thus focus on updating the transition matrix
+\(\mathbf{P}_{ij},~1\leq i, j \leq K\) and dynamics parameters
+\(\lbrace m(k), \mathbf{A}(k), \mathbf{\Sigma}(k)\rbrace_{k = 1,\dots, K}\).
 
-\hypertarget{updating-mathbfp}{%
-\subsection*{\texorpdfstring{Updating \(\mathbf{P}\)}{Updating \textbackslash{}mathbf\{P\}}}\label{updating-mathbfp}}
+\subsection*{\texorpdfstring{Updating
+\(\mathbf{P}\)}{Updating \textbackslash{}mathbf\{P\}}}\label{updating-mathbfp}
 \addcontentsline{toc}{subsection}{Updating \(\mathbf{P}\)}
 
-We recall that \(\mathbf{P} = \left \lbrace\mathbf{P}_{kk'} := p(z_{t} = k' \vert z_{t - 1} = k, \theta) \right\rbrace_{k,k' = 1,\dots, K}\). \(\mathbf{P}\) is a stochastic matrix, and then satisfies the \(K\) constraints:
+We recall that
+\(\mathbf{P} = \left \lbrace\mathbf{P}_{kk'} := p(z_{t} = k' \vert z_{t - 1} = k, \theta) \right\rbrace_{k,k' = 1,\dots, K}\).
+\(\mathbf{P}\) is a stochastic matrix, and then satisfies the \(K\)
+constraints:
 \(g(\mathbf{P}_{k\bullet}): = \sum_{k'=1}^K P_{kk'} = 1, 1\leq k \leq K\).
-Thus, maximizing \(Q(\theta \vert \theta^{(0)})\) with respect to \(\mathbf{P}\) only requires to focus on the terms
+Thus, maximizing \(Q(\theta \vert \theta^{(0)})\) with respect to
+\(\mathbf{P}\) only requires to focus on the terms
 \[\sum_{k' = 1}^K \sum_{t = 1}^ np(z_{t-1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)}) \log \mathbf{P}_{kk'} := f(\mathbf{P}_{k\bullet}).\]
-Using the Lagrange multiplier method, we want to solve the \(K\) systems of \(K + 1\) equations:
+Using the Lagrange multiplier method, we want to solve the \(K\) systems
+of \(K + 1\) equations:
+
 \begin{align*}
 \nabla f(\mathbf{P}_{k\bullet}) &= \lambda_k \nabla g(\mathbf{P}_{k\bullet})\\
 g(\mathbf{P}_{k\bullet}) &= 1,
 \end{align*}
-where \(\nabla\) is the gradient operator, and \(\lambda_k \in \mathbb{R}^*\) is called the Lagrange multiplier. In this case, we therefore have:
+
+where \(\nabla\) is the gradient operator, and
+\(\lambda_k \in \mathbb{R}^*\) is called the Lagrange multiplier. In
+this case, we therefore have:
+
 \begin{align*}
 \frac{\sum_{t = 1}^n p(z_{t-1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)})}{\mathbf{P}_{k,k'}} &= \lambda_k \\
 \sum_{k' = 1}^K{\mathbf{P}_{kk'}} &= 1.
 \end{align*}
+
 This leads directly to:
+
 \begin{align*}
 \lambda_k &= \sum_{t = 1}^n p(z_{t - 1} = k \vert y_{0:n}, \theta^{(0)}) \\
 \mathbf{P}_{kk'} &= \frac{\sum_{t = 1}^n p(z_{t - 1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)}) }{\sum_{t = 1}^n p(z_{t - 1} = k \vert y_{0:n}, \theta^{(0)})}
 \end{align*}
 
-\hypertarget{updating-dynamics-parameters}{%
-\subsection*{Updating dynamics parameters}\label{updating-dynamics-parameters}}
+\subsection*{Updating dynamics
+parameters}\label{updating-dynamics-parameters}
 \addcontentsline{toc}{subsection}{Updating dynamics parameters}
 
 For each \(1\leq k \leq K\), our goal is to maximize the terms:
 \[\sum_{t = 1}^n p(z_t = k\vert y_{0:n}, \theta^{(0)}) \log p(y_{t} \vert z_{t} = k, \theta).\]
-One can recognize here that it is the same linear framework as \eqref{eq:AR-simple} where a specific weight (the posterior probability of being in \(k\) under \(\theta^{(0)}\)) would be assigned to each observation.
-In this context, maximizing in \(\theta\) then results in \(K\) weighted linear regressions.
+One can recognize here that it is the same linear framework as
+\eqref{eq:AR-simple} where a specific weight (the posterior probability of
+being in \(k\) under \(\theta^{(0)}\)) would be assigned to each
+observation. In this context, maximizing in \(\theta\) then results in
+\(K\) weighted linear regressions.
 
 For \(1 \leq k\leq K\), updating
-\(\mathbf{B}(k) := \begin{pmatrix} m'(k)\\ \mathbf{A}(k) \end{pmatrix}\) is done using the weighted least square estimator:
+\(\mathbf{B}(k) := \begin{pmatrix} m'(k)\\ \mathbf{A}(k) \end{pmatrix}\)
+is done using the weighted least square estimator:
 \[\widehat{\mathbf{B}}(k) = \left(\mathbf{X}'\mathbf{W}(k)\mathbf{X} \right)^{-1} \mathbf{X}'\mathbf{W}(k) \mathbf{Y},\]
 where
 \[\mathbf{W}(k) = \begin{pmatrix}p(z_0 = k\vert y_{0:n}, \theta^{(0)}) & \cdots & 0 \\

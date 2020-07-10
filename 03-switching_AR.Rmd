@@ -188,10 +188,10 @@ One can recognize here that it is the same linear framework as  \@ref(eq:AR-simp
 In this context, maximizing in $\theta$ then results in $K$ weighted linear regressions. 
 
 For $1 \leq k\leq K$, updating 
-$\mathbf{B}(k) := \begin{pmatrix} m'(k)\\ \mathbf{A}(k) \end{pmatrix}$ is done using the weighted least square estimator:
+$\mathbf{B}(k) := \begin{pmatrix} m'(k)\\ \mathbf{A}'(k) \end{pmatrix}$ is done using the weighted least square estimator:
 $$\widehat{\mathbf{B}}(k) = \left(\mathbf{X}'\mathbf{W}(k)\mathbf{X} \right)^{-1} \mathbf{X}'\mathbf{W}(k) \mathbf{Y},$$
 where 
-$$\mathbf{W}(k) = \begin{pmatrix}p(z_0 = k\vert y_{0:n}, \theta^{(0)}) & \cdots & 0 \\
+$$\mathbf{W}(k) = \begin{pmatrix}p(z_1 = k\vert y_{0:n}, \theta^{(0)}) & \cdots & 0 \\
 \vdots & \ddots & \vdots\\
-0 & \cdots & p(z_{n-1} = k\vert y_{0:n}, \theta^{(0)})
+0 & \cdots & p(z_{n} = k\vert y_{0:n}, \theta^{(0)})
 \end{pmatrix}$$

@@ -47,3 +47,28 @@ set_ar_from_ou <- function(ou_parameter_list, delta_t = 1, integrated = TRUE){
                  cbind(covariance_pos_vel, covariance_pos))
   list(m = m, A = A, Sigma = Sigma, delta_t = delta_t)
 }
+
+set_ou_from_ar <- function(ar_parameter_list, delta_t = NULL, integrated = TRUE){
+  m <- ar_parameter_list$m
+  A <- ar_parameter_list$A
+  Sigma <- ar_parameter_list$Sigma
+  delta_t <- ifelse(is.null(delta_t), 1,
+                    delta_t)
+  if(integrated){
+    if((ncol(A) %% 2) != 0){
+      stop("In the integrated case, the number of columns of A must be even")
+    }
+    dimension <- ncol(A) * 0.5
+  }
+  Id <- diag(1, dimension)
+  A_vel <- A[1:dimension, 1:dimension]
+  gamma_ <- -expm::logm(A_vel) / delta_t 
+  m_vel <- m[1:dimension]
+  mu_ <- as.numeric(solve(Id - A_vel) %*% m_vel)
+  cov_vel_vec <- Sigma[1:dimension, 1:dimension] %>% as.numeric()
+  S_vec <- solve(diag(1, 2 * dimension) - kronecker(A_vel, A_vel)) %*% cov_vel_vec
+  diffusion_ <- ((kronecker(gamma_, Id) + kronecker(Id, gamma_)) %*% S_vec) %>% 
+    matrix(nrow = dimension, ncol = dimension) %>% chol() %>% round(12)
+  list(mean = round(mu_, 15), recall = round(gamma_, 15), 
+       diffusion = round(diffusion_, 15))
+}
