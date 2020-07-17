@@ -85,7 +85,7 @@
 
 \title{Inference in multivariate autoregressive process and its extensions}
 \author{Pierre Gloaguen}
-\date{2020-07-09}
+\date{2020-07-17}
 
 \begin{document}
 \maketitle
@@ -201,10 +201,18 @@ If we denote \(Y_t = \begin{pmatrix} V_{t} \\ X_{t} \end{pmatrix}\), one
 can see that:
 
 \begin{equation*}
-Y_{t + \Delta}\vert Y_t = m(\Delta) + \mathbf{A}(\Delta)  Y_t + E_t
+Y_{t + \Delta}\vert Y_t = m(\Delta) + \mathbf{A}(\Delta)  Y_t + E_t,~E_t \sim\mathcal{N}(0,\Sigma(\Delta))
 \end{equation*}
 
-where
+where \[
+m(\Delta) =
+\begin{pmatrix}
+(I - \e^{-\Gamma\Delta}) \mu\\
+(\Delta I - \Gamma\inv + \Gamma\inv\e^{-\Gamma\Delta})\mu
+\end{pmatrix},
+\] and
+\[\mathbf{A}\left(\Delta\right) = \begin{pmatrix}\e^{-\Gamma\Delta} & \mathbf{0} \\
+\Gamma\inv - \Gamma\inv\e^{-\Gamma\Delta} &I_2\end{pmatrix}\]
 
 \chapter{Multivariate autoregressive model}\label{simpleAR}
 
@@ -459,7 +467,7 @@ related weights, that depends on the the observations and on
 Indeed, we have:
 
 \begin{align}
-Q(\theta \vert \theta^{(0)} :=& \mathbb{E}[\ell(\theta \vert Y_{0:n}, Z_{0:n}) \vert Y_{0:n} = y_{0:n}, \theta^{(0)}]\nonumber \\
+Q(\theta \vert \theta^{(0)}) :=& \mathbb{E}[\ell(\theta \vert Y_{0:n}, Z_{0:n}) \vert Y_{0:n} = y_{0:n}, \theta^{(0)}]\nonumber \\
 =& \sum_{z_{0:n}} \ell(\theta \vert y_{0:n}, z_{0:n}) p(z_{0:n} \vert y_{0:n}, \theta^{(0)}) \text{d} z_{0:n} \nonumber \\
 =& \sum_{k = 1}^K p(z_0 = k \vert y_{0:n}, \theta^{(0)})\left(\log p(z_0 = k \vert \theta) + \log(p(y_0 \vert z_0 = k, \theta))\right)  \nonumber \\
 & + \sum_{k = 1}^K\sum_{k' = 1}^K \sum_{t = 1}^n p(z_{t-1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)}) \log p(z_{t} = k' \vert z_{t - 1} = k,\theta) \nonumber \\
@@ -597,14 +605,14 @@ observation. In this context, maximizing in \(\theta\) then results in
 \(K\) weighted linear regressions.
 
 For \(1 \leq k\leq K\), updating
-\(\mathbf{B}(k) := \begin{pmatrix} m'(k)\\ \mathbf{A}(k) \end{pmatrix}\)
+\(\mathbf{B}(k) := \begin{pmatrix} m'(k)\\ \mathbf{A}'(k) \end{pmatrix}\)
 is done using the weighted least square estimator:
 \[\widehat{\mathbf{B}}(k) = \left(\mathbf{X}'\mathbf{W}(k)\mathbf{X} \right)^{-1} \mathbf{X}'\mathbf{W}(k) \mathbf{Y},\]
 where
-\[\mathbf{W}(k) = \begin{pmatrix}p(z_0 = k\vert y_{0:n}, \theta^{(0)}) & \cdots & 0 \\
+\[\mathbf{W}(k) = \begin{pmatrix}p(z_1 = k\vert y_{0:n}, \theta^{(0)}) & \cdots & 0 \\
 \vdots & \ddots & \vdots\\
-0 & \cdots & p(z_{n-1} = k\vert y_{0:n}, \theta^{(0)})
-\end{pmatrix}\]
+0 & \cdots & p(z_{n} = k\vert y_{0:n}, \theta^{(0)})
+\end{pmatrix}.\] The estimator of \(\Sigma(k)\)
 
 \bibliography{book.bib,packages.bib}
 

@@ -72,13 +72,40 @@ V_{t} \\
 X_{t}
 \end{pmatrix}$, one can see that:
 \begin{equation*}
-Y_{t + \Delta}\vert Y_t = m(\Delta) + \mathbf{A}(\Delta)  Y_t + E_t
+Y_{t + \Delta}\vert Y_t = m(\Delta) + \mathbf{A}(\Delta)  Y_t + E_t,~E_t \sim\mathcal{N}(0,\Sigma(\Delta))
 \end{equation*}
 where
-<!-- $$ -->
-<!-- m(\Delta) =  -->
-<!-- \begin{matrix} -->
-<!-- (I - \e^{-\Gamma\Delta}) \mu\\ -->
-<!-- (I - \Gamma\inv + \e^{-\Gamma\Delta})\mu -->
-<!-- \end{pmatrix} -->
-<!-- $$ -->
+$$
+m(\Delta) =
+\begin{pmatrix}
+(I - \e^{-\Gamma\Delta}) \mu\\
+(\Delta I - \Gamma\inv + \Gamma\inv\e^{-\Gamma\Delta})\mu
+\end{pmatrix},
+$$
+and 
+$$\mathbf{A}\left(\Delta\right) = \begin{pmatrix}\e^{-\Gamma\Delta} & \mathbf{0} \\
+\Gamma\inv - \Gamma\inv\e^{-\Gamma\Delta} &I_2\end{pmatrix}.$$
+
+
+One can also see that we have:
+$$Y_{t + \Delta}\vert Y_t - \overbrace{\begin{pmatrix}\mathbf{0} \\
+I_2\end{pmatrix}}^{:= \mathbf{A}_X}X_t = m(\Delta) +  \overbrace{\begin{pmatrix}\e^{-\Gamma\Delta}\\
+\Gamma\inv - \Gamma\inv\e^{-\Gamma\Delta}\end{pmatrix}}^{:=\mathbf{A}_V(\Delta)} V_t + E_t$$
+
+Therefore, if we have a sample $Y_0,\dots, Y_n$, recorded at times $0,\Delta,\dots, n\Delta$
+
+$$\tilde{\mathbf{Y}} = \mathbf{X}\mathbf{B} + \mathbf{E}$$
+où
+$$\tilde{\mathbf{Y}} = \begin{pmatrix}Y_{1} -\mathbf{A}_X X_0 \\
+\vdots \\ 
+Y_{n} - -\mathbf{A}_X X_{n - 1}
+\end{pmatrix}$$
+$$\mathbf{X} = \begin{pmatrix}
+1 & V_0'\\
+\vdots & \vdots \\
+1 & V'_{n -1}
+\end{pmatrix}$$
+$$\mathbf{B} = \begin{pmatrix}
+m(\Delta)'\\
+A^'_V(\Delta)
+\end{pmatrix}$$

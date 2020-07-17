@@ -17,6 +17,27 @@ get_mle_estimates <- function(observations, weights = NULL){
   list(m = m_hat, A = A_hat, Sigma = Sigma_hat)
 }
 
+get_iou_estimates <- function(observations, weights = NULL){
+  n <- nrow(observations) - 1
+  if(is.null(weights)){
+    weights <- rep(1, n)
+  }
+  W <- diag(weights)
+  if(nrow(W) != n){
+    stop("weights must be a vector of size nrow(observations) - 1")
+  }
+  A_X <- rbind(matrix(0, ncol = 2, nrow = 2), diag(1, 2))
+  Y <- observations[-1, ] - observations[-(n + 1), -c(1,2)] %*% t(A_X)
+  X <- cbind(rep(1, n), observations[-(n + 1), 1:2])
+  B_hat <- solve(t(X) %*% W %*% X) %*% t(X) %*% W %*% Y
+  m_hat <- B_hat[1, ]
+  A_V_hat <- t(B_hat[-1, ])
+  pred_mat <- Y - X %*% B_hat 
+  Sigma_hat <- t(pred_mat) %*% diag(weights / sum(weights)) %*% pred_mat
+  list(m = m_hat, A = A_V_hat, Sigma = Sigma_hat)
+}
+
+
 get_log_densites_HMM <- function(observations, parameters){
   n <- nrow(observations) - 1
   sapply(parameters, 

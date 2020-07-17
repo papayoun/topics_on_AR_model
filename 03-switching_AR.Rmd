@@ -102,7 +102,7 @@ As this function of $\theta$ is an expectation with respect to a discrete distri
 Indeed, we have:
 
 \begin{align}
-Q(\theta \vert \theta^{(0)} :=& \mathbb{E}[\ell(\theta \vert Y_{0:n}, Z_{0:n}) \vert Y_{0:n} = y_{0:n}, \theta^{(0)}]\nonumber \\
+Q(\theta \vert \theta^{(0)}) :=& \mathbb{E}[\ell(\theta \vert Y_{0:n}, Z_{0:n}) \vert Y_{0:n} = y_{0:n}, \theta^{(0)}]\nonumber \\
 =& \sum_{z_{0:n}} \ell(\theta \vert y_{0:n}, z_{0:n}) p(z_{0:n} \vert y_{0:n}, \theta^{(0)}) \text{d} z_{0:n} \nonumber \\
 =& \sum_{k = 1}^K p(z_0 = k \vert y_{0:n}, \theta^{(0)})\left(\log p(z_0 = k \vert \theta) + \log(p(y_0 \vert z_0 = k, \theta))\right)  \nonumber \\
 & + \sum_{k = 1}^K\sum_{k' = 1}^K \sum_{t = 1}^n p(z_{t-1} = k, z_{t} = k'\vert y_{0:n}, \theta^{(0)}) \log p(z_{t} = k' \vert z_{t - 1} = k,\theta) \nonumber \\
@@ -194,4 +194,5 @@ where
 $$\mathbf{W}(k) = \begin{pmatrix}p(z_1 = k\vert y_{0:n}, \theta^{(0)}) & \cdots & 0 \\
 \vdots & \ddots & \vdots\\
 0 & \cdots & p(z_{n} = k\vert y_{0:n}, \theta^{(0)})
-\end{pmatrix}$$
+\end{pmatrix}.$$
+The estimator of $\Sigma(k)$

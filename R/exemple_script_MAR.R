@@ -11,10 +11,36 @@ true_ou_parameters <- list(mean = c(0, 0),
 true_ar_parameters <- set_ar_from_ou(ou_parameter_list =  true_ou_parameters,
                                      delta_t = 0.5)
 
-simulated_matrix <- simulate_MAR(1000, Y0 = c(-10, -10, 0, 0), 
-                                parameters = true_ar_parameters)
-get_mle_estimates(simulated_matrix)
-
+foo <- function(...){
+  simulated_matrix <- simulate_MAR(300, Y0 = c(-10, -10, 0, 0), 
+                                   parameters = true_ar_parameters)
+  mle <- get_mle_estimates(simulated_matrix)
+  iou <- get_iou_estimates(simulated_matrix)
+  mle$A <- mle$A[,c(1,2)]
+  truth <- true_ar_parameters
+  truth$A <- true_ar_parameters$A[,c(1,2)]
+  res <- mapply(function(x, y, z, name_) {
+    tibble(parameter = name_,
+           mle = sum((x - z)^2),
+           iou = sum((y - z)^2))
+  },
+  mle, iou, truth[-4],
+  names(true_ar_parameters[-4]), SIMPLIFY = FALSE) %>% 
+    bind_rows()
+  res 
+}
+essais <- mclapply(1:(1e4), foo, mc.cores = 10) %>% 
+  bind_rows()
+essais %>% 
+  gather(-parameter, key = "method", value = "erreur") %>%
+  ggplot(aes(y = erreur, x = method)) +
+  geom_boxplot() +
+  facet_wrap(~parameter, scales = "free_y")
+essais %>% 
+  mutate(diff = mle - iou) %>% 
+  ggplot(aes(x = parameter, y = diff)) +
+  geom_boxplot() +
+  facet_wrap(~parameter, scales = "free")
 simulated_tibble <- simulated_matrix %>% 
   as_tibble() %>% 
   rename(X1 = V3, X2 = V4) %>% 
