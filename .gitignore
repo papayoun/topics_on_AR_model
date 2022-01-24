@@ -50,6 +50,12 @@ _book/*.pdf
 _book/*.epub
 _book/*_files/
 
+*.log
+*.aux
+*.toc
+topics_*.tex
+topics_*.Rmd
+
 # End of https://www.toptal.com/developers/gitignore/api/r
 
 .Rproj.user

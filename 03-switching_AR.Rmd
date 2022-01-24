@@ -2,10 +2,13 @@
 output:
   pdf_document: default
   html_document: default
+editor_options: 
+  chunk_output_type: console
 ---
 # Switching autoregressive system
 
-In this chapter, we focus on a more complex system involving autoregressive structure. We still focus on a time series $y_0, \dots, y_n$ of values in $\mathbb{R}^d$. However, it is now supposed that the time series dynamics could change through time, according to an unobserved stochastic process in a discrete space. 
+In this chapter, we focus on a more complex system involving autoregressive structure.
+We still focus on a time series $y_0, \dots, y_n$ of values in $\mathbb{R}^d$. However, it is now supposed that the time series dynamics could change through time, according to an unobserved stochastic process in a discrete space.
 This unobserved process might model different regimes of the dynamics (see @rabiner1989tutorial for selected applications).
 
 ## Model
@@ -16,20 +19,20 @@ We assume that these observations are realisations of random variables $Y_0,\dot
 Z_0 &\sim \chi_{0, Z}(\cdot)\\
 Z_t \vert Z_{t - 1} &\sim p(z_t \vert Z_{t - 1}) \\
 Y_0 &\sim \chi_{0, Y}(\cdot \vert Z_0), \\
-Y_t \vert Z_t &= m(Z_t) + \mathbf{A}(Z_t)Y_{t -1} + E_t,~1\leq t \leq n 
+Y_t \vert Z_t &= m(Z_t) + \mathbf{A}(Z_t)Y_{t -1} + E_t,~1\leq t \leq n
 \end{align*}
-where 
+where
 
 - $\left\lbrace Z_t \right\rbrace_{0\leq t \leq n}$ is an homogeneous Markov chain taking value on the finite space $\mathbb{K} = \lbrace1,\dots, K \rbrace$, and of transition matrix denoted by $\mathbf{P}$,
 - $\lbrace m(k)\in\mathbb{R}^d,~\mathbf{A}(k)\in \mathcal{M}_{d\times d}\rbrace_{k = 1,\dots, K}$ are unknown parameters.
 - $\chi_{0, Z}(\cdot)$ and $\chi_{0, Y}(\cdot \vert Z_0)$ are some probability distributions over $\mathbb{K}$ and $\mathbb{R}^d$
 - $p(z_t\vert Z_{t-1})$  is the law of $Z_t$ condtionnally to $Z_{t - 1}$ (here the line of $\mathbf{P}$ given by $Z_{t - 1}$).
-- $E_t$ is a random vector such that: 
+- $E_t$ is a random vector such that:
 \begin{equation*}
 E_t \overset{ind.}{\sim} \mathcal{N}\left(0, \mathbf{\Sigma}\right).
 \end{equation*} where $\mathbf{\Sigma}$ is $d\times d$ covariance matrix.
 
-In this context, the set of unknown parameters is given by 
+In this context, the set of unknown parameters is given by
 $$\theta = \left\lbrace \mathbf{P}, m(k),~\mathbf{A}(k), \mathbf{\Sigma}\right \rbrace_{k = 1,\dots, K}.$$
 
 ## Inference
@@ -39,14 +42,14 @@ In this context, the inference task is twofold:
 1. Obtaining maximum likelihood estimate of $\theta$;
 2. Retracing the hidden sequence $Z_0,\dots Z_n$ given the observations $Y_{0:n}$.
 
-It is well known that these two tasks are indeed complementary. 
+It is well known that these two tasks are indeed complementary.
 A common way to solve these problems is the Expectation Maximization (EM) algorithm
-[@dempster1977maximum]. 
+[@dempster1977maximum].
 The algorithm is shortly depicted here.
 
 ### Comment about notations {-}
 
-In the following, we use the notation $p$ for a generic probability distribution. The law to which it refers is explicit through arguments. For instance $p(y_{0:n} \vert z_{0:n})$ is the p.d.f. of a Gaussian vector, the random vector $Y_{0:n}\vert Z_{0:n}$, and $p(z_t\vert z_{t - 1})$ is the law of the discrete random variable $Z_{t} \vert Z_{t - 1}$ evaluated at $z_t$ and $z_{t -1}$. 
+In the following, we use the notation $p$ for a generic probability distribution. The law to which it refers is explicit through arguments. For instance $p(y_{0:n} \vert z_{0:n})$ is the p.d.f. of a Gaussian vector, the random vector $Y_{0:n}\vert Z_{0:n}$, and $p(z_t\vert z_{t - 1})$ is the law of the discrete random variable $Z_{t} \vert Z_{t - 1}$ evaluated at $z_t$ and $z_{t -1}$.
 In this context, $p(z_t\vert z_{t - 1}) = \mathbb{P}(Z_t = z_t \vert \lbrace Z_{t-1} = z_{t -1}\rbrace.$
 
 
@@ -71,7 +74,7 @@ We have that:
 \ell(\theta \vert y_{0:n}, z_{0:n}) :=& \log p(y_{0:n}, z_{0:n} \vert \theta) \nonumber \\
 =& \log p(y_{0:n}, z_{0:n}) \nonumber \\
 =& \log p(z_{0:n}) + \log p(y_{0:n}\vert z_{0:n}) \nonumber \\
-=&  \log p(z_0 \vert \theta) + \log p(y_0\vert z_0, \theta) \nonumber \\ 
+=&  \log p(z_0 \vert \theta) + \log p(y_0\vert z_0, \theta) \nonumber \\
 &+ \sum_{t = 1}^n \log p(z_{t} \vert z_{t - 1}, \theta) + \sum_{t = 1}^n \log p(y_{t}\vert y_{t -1}, z_{t}, \theta)  (\#eq:AR-HMM-complete-log-likelihood).
 \end{align}
 
@@ -79,7 +82,7 @@ We emphasize here that, if the hidden states were known, this complete log-likel
 
 ### Expectation-Maximization algorithm
 
-A workaround to find the maximum likelihood estimate in this context is the EM algorithm. 
+A workaround to find the maximum likelihood estimate in this context is the EM algorithm.
 For a given set of parameters, say $\theta^{(0)}$, let's consider the following function of $\theta$:
 
 \begin{equation}
@@ -96,7 +99,7 @@ This property naturally suggests an algorithm to obtain the MLE in this model:
 
 It can be shown that the resulting sequence $\lbrace\theta^{(k)} \rbrace_{k \in \mathbb{N}}$ has a non decreasing set of likelihood values, and it converges towards a critical point (i.e., where the gradient of the likelihood is 0).
 
-In this section, one can ask what's the meaning of *computing* $Q(\theta \vert \theta^{(k-1)})$. 
+In this section, one can ask what's the meaning of *computing* $Q(\theta \vert \theta^{(k-1)})$.
 As this function of $\theta$ is an expectation with respect to a discrete distribution (the distribution of missing values conditionnally to the observations, under the parameter $\theta^{(k-1)}$), *computing* this function means to compute the related weights, that depends on the the observations and on $\theta^{(k-1)}$.
 
 Indeed, we have:
@@ -111,20 +114,20 @@ Q(\theta \vert \theta^{(0)}) :=& \mathbb{E}[\ell(\theta \vert Y_{0:n}, Z_{0:n}) 
 
 ### E step, the Baum-Welch smoothing algorithm
 
-The E step requires to compute $p(z_t = k \vert y_{0:n}, \theta^{(0)})$ and 
+The E step requires to compute $p(z_t = k \vert y_{0:n}, \theta^{(0)})$ and
 $p(z_{t - 1} = k, z_{t} = k' \vert y_{0:n}, \theta^{(0)})$.
 
 This is done in an twofold iterative way using the fact that:
 
 \begin{align*}
-p(z_t \vert y_{0:n}, \theta^{(0)}) &\propto 
+p(z_t \vert y_{0:n}, \theta^{(0)}) &\propto
 \left\lbrace
 \begin{array}{ll}
 p(y_{0:t}, z_t \vert{\theta^{(0)}})p(y_{(t+1):n} \vert z_t, y_t, \theta^{(0)})  &~0\leq t < n, \\
 p(y_{0:n}, z_n \vert{\theta^{(0)}})&~t = n.
 \end{array}
 \right. \\
-p(z_{t - 1}, z_t \vert y_{0:n}, \theta^{(0)}) &\propto 
+p(z_{t - 1}, z_t \vert y_{0:n}, \theta^{(0)}) &\propto
 \left\lbrace
 \begin{array}{ll}
 p(y_{0:{t - 1}}, z_{t -1} \vert{\theta^{(0)}}) p(z_{t} \vert z_{t -1}, \theta^{(0)}) p(y_t \vert z_t, \theta^{(0)}) p(y_{(t + 1):n} \vert z_{t }, y_t, \theta^{(0)}),  &~1\leq t < n, \\
@@ -144,7 +147,7 @@ The key point here is the appearance of two key quantities, $\alpha_t(k) := p(y_
 
 It thus remains to perform the M-step.
 
-### M step, constrained optimization and weighted least square 
+### M step, constrained optimization and weighted least square
 
 The goal is now to maximize, with respect to $\theta$, the function:
 \begin{align*}
@@ -185,12 +188,12 @@ This leads directly to:
 For each $1\leq k \leq K$, our goal is to maximize the terms:
 $$\sum_{t = 1}^n p(z_t = k\vert y_{0:n}, \theta^{(0)}) \log p(y_{t} \vert z_{t} = k, \theta).$$
 One can recognize here that it is the same linear framework as  \@ref(eq:AR-simple) where a specific weight (the posterior probability of being in $k$ under $\theta^{(0)}$) would be assigned to each observation.
-In this context, maximizing in $\theta$ then results in $K$ weighted linear regressions. 
+In this context, maximizing in $\theta$ then results in $K$ weighted linear regressions.
 
-For $1 \leq k\leq K$, updating 
+For $1 \leq k\leq K$, updating
 $\mathbf{B}(k) := \begin{pmatrix} m'(k)\\ \mathbf{A}'(k) \end{pmatrix}$ is done using the weighted least square estimator:
 $$\widehat{\mathbf{B}}(k) = \left(\mathbf{X}'\mathbf{W}(k)\mathbf{X} \right)^{-1} \mathbf{X}'\mathbf{W}(k) \mathbf{Y},$$
-where 
+where
 $$\mathbf{W}(k) = \begin{pmatrix}p(z_1 = k\vert y_{0:n}, \theta^{(0)}) & \cdots & 0 \\
 \vdots & \ddots & \vdots\\
 0 & \cdots & p(z_{n} = k\vert y_{0:n}, \theta^{(0)})

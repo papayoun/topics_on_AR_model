@@ -1,0 +1,180 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+editor_options: 
+  chunk_output_type: console
+---
+
+# Linear dynamics systems
+
+In this chapter, we focus on the case where observations consist in a multivariate time series $y_1, \dots, y_n$ such that for any $1\leq t \leq n$, $y_t \in \mathbb{R}^{d_Y}$, we denote:
+$$
+y_t = 
+\begin{pmatrix}
+y_{t,1}\\
+\vdots\\
+y_{t, {d_Y}}
+\end{pmatrix}
+$$
+
+## Model
+
+We assume that these observations are realisations of random variables $(Y_1,\dots, Y_n)$ which reflects an *hidden signal* $(X_1, \dots, X_n)$  such that:
+\begin{align}
+X_1 &\sim \mathcal{N}(\mu_0, \Sigma_0),\nonumber \\
+X_t &= b_X + \mathbf{A_X}X_{t -1} + E_{t, X},~2\leq t \leq n (\#eq:Hidden-AR)\\
+Y_t &= b_Y + \mathbf{A_Y}X_{t} + E_{t, Y},~1\leq t \leq n (\#eq:Observations-distribution)
+\end{align}
+
+where  $\mu_0, b_X \in\mathbb{R}^{d_X}, \mathbf{A_X}\in \mathcal{M}_{d_X\times d_X}, b_Y \in\mathbb{R}^{d_Y}, \mathbf{A_Y}\in \mathcal{M}_{d_Y\times d_Y}$ are parameters, $E_{t, X}$, (resp. $E_{t, Y}$)  is a $d_X$ (resp. $d_Y$) dimensionnal vector such that:
+
+$$
+E_{t, X} \overset{ind.}{\sim} \mathcal{N}_{d_X}\left(0, \mathbf{\Sigma_X}\right) \left(\text{resp. } E_{t, Y} \overset{ind.}{\sim} \mathcal{N}_{d_Y}\left(0, \mathbf{\Sigma_Y}\right)\right)
+$$
+
+## Inference
+
+In such a system, a key challenge is to compute the *smoothing distribution*, i.e., the *a posteriori* distribution of
+$X_{1:n}\vert Y_{1:n}$.
+
+Actually, the marginal distributions can be obtained using Kalman recursions.
+
+## Gaussian vectors
+
+Suppose we have a random vector $\mathbf{Z} = \begin{pmatrix} X \\ Y\end{pmatrix}$ such that:
+\begin{align*}
+X \sim \mathcal{N}(\mu_X, \Lambda_X^{-1}),\\
+Y \vert X \mathcal{N}(AX + b, \Lambda_{Y\vert X}^{-1}).
+\end{align*}
+
+We are interested in determining the conditionnal distribution of $X\vert Y$ and the marginal distribution of $Y$.
+\begin{align*}
+\log (p(x, y)) &= \log(p(y\vert x)) + \log(p(x)) \\
+&=-\frac{1}{2}\left(
+\overbrace{(y - Ax - b)'\Lambda_{Y\vert X}(y - Ax - b) + (x - \mu_X)'\Lambda_X(x - \mu_X}^{:=Q(x, y)})
+\right) + \text{Cst}.
+\end{align*}
+
+Here, the Cst term denotes a constant that do not depend either on $x$ or $y$.
+
+We focus on the quadratic form $Q(x, y)$ that completely characterizes the joint distribution.
+
+\begin{align*}
+Q(x, y) =& x'(A'\Lambda_{Y\vert X}A + \Lambda_X)x + y'\Lambda_{Y\vert X}y -
+2x'A'\Lambda_{X\vert Y}y - & \text{ Second order terms}\\
+& 2x'(\Lambda_X\mu_X) - A'\Lambda_{Y\vert X}b) -  2y'\Lambda_{Y\vert X}b  + & \text{ First order terms} \\
+& b'\Lambda_{Y\vert_X}b + \mu_X' \Lambda_X \mu_X
+\end{align*}
+
+### Posterior distribution of $X$
+
+Considering $y$ as a constant in the previous equation one can write:
+
+$$
+Q(x) = x'(A'\Lambda_{Y\vert X}A + \Lambda_X)x  -
+2x'\left(A'\Lambda_{X\vert Y}(y - b) + \Lambda_X\mu_X \right).
+$$
+
+We therefore recognize a Gaussian distribution and have that:
+$$X\vert Y \sim \mathcal{N}(\mu_{X\vert Y} := \Lambda_{X\vert Y}^{-1}\left(A'\Lambda_{X\vert Y}(y - b) + \Lambda_X\mu_X\right), \Lambda_{X\vert Y} := A'\Lambda_{Y\vert X}A + \Lambda_X)$$
+
+### Marginal distribution of $Y$
+
+We first recognize from the first order terms the precision matrix $\Lambda_{(X, Y)}$ of the joint distribution:
+
+\begin{align*}
+x'(A'\Lambda_{Y\vert X}A + \Lambda_X)x + y'\Lambda_{Y\vert X}y -
+2x'A'\Lambda_{X\vert Y}y =
+\begin{pmatrix}
+x & y
+\end{pmatrix}
+\begin{pmatrix}
+\Lambda_X + A'\Lambda_{Y\vert X}A & -A'\Lambda_{Y\vert X} \\
+-\Lambda_{Y\vert X}A& \Lambda_{Y\vert X}
+\end{pmatrix}
+\end{align*}
+
+
+The precision matrix is then partitioned. To obtain the covariance matrix, we use the following property:
+
+$$
+\begin{pmatrix}
+A & B \\
+C & D
+\end{pmatrix}^{-1} = \begin{pmatrix}
+M & -MBD^{-1} \\
+-D^{-1}CM & D^{-1} + D^{-1}CMBD^{-1}
+\end{pmatrix},
+$$
+where $M$ is the *Schur complement* of the original matrix:
+$$M = (A - BD^{-1}C)^{-1} \overset{\text{here}}{=} (\Lambda_X + A'\Lambda_{Y\vert X}A  - A'\Lambda_{Y\vert X}\Lambda_{Y \vert X}^{-1}\Lambda_{Y\vert X}A )^{-1} = \Lambda_X^{-1}.$$
+We therefore have here:
+
+$$
+\Sigma_{(X, Y)} =
+\begin{pmatrix}
+\Lambda_X^{-1} & \Lambda_X^{-1}A' \\
+A\Lambda_X^{-1} & \Lambda_{Y\vert X}^{-1} + A\Lambda_X^{-1}A'
+\end{pmatrix}
+$$
+
+Therefore, the marginal covariance of $Y$ is given by $\Sigma_Y =  \Lambda_{Y\vert X}^{-1} + A\Lambda_X^{-1}A'$.
+To find the marginal expectation, we use the first order terms of the quadratic form.
+$$
+2x'(A'\Lambda_{Y\vert X}b - \Lambda_X\mu_X)) -  2y'\Lambda_{Y\vert X}b =
+\begin{pmatrix}
+x&y
+\end{pmatrix}
+\begin{pmatrix}
+\Lambda_X\mu_X - A'\Lambda_{Y\vert X}b \\
+\Lambda_{Y\vert X}b
+\end{pmatrix}.
+$$
+
+We therefore have that:
+$$\mu_{(X, Y)} = \Sigma_{X, Y} \begin{pmatrix}
+\Lambda_X\mu_X - A'\Lambda_{Y\vert X}b\\
+\Lambda_{Y\vert X}b
+\end{pmatrix} =
+\begin{pmatrix}
+\mu_X\\
+A\mu_X  + b
+\end{pmatrix}.$$
+
+
+These results allows for recursive computation of the Kalman filter.
+
+
+
+
+### Kalman filter
+
+*Nice notes with all the recursions are available [here](https://jwmi.github.io/ASM/6-KalmanFilter.pdf).*
+
+First, let's suppose we have only one observation $y_1$, and are interested in recovering the posterior distribution of $X_1\vert \left\lbrace Y_1 = y_1$
+
+Then,
+ lif
+\begin{align*}
+p(x_1\vert y_1) &= \frac{p(y_1\vert x_1) p(x_1)}{p(y_1)} \\
+&\underset{x_1}{\propto} p(y_1\vert x_1) p(x_1) \\
+&\propto \exp\left(-\frac{1}{2}\left(y_1 - b_Y - A_Yx_1 \right)'\Sigma_Y^{-1}\left(y_1 - b_Y - A_Yx_1 \right) \right)\exp\left(-\frac{1}{2}\left(x_1 - \mu_0 \right)'\Sigma_0^{-1}\left(x_1 - \mu_0 \right) \right)\\
+&\propto \exp \left(
+-\frac{1}{2} \left(
+x_1'\overbrace{\left(\Sigma_0^{-1} + A_Y'\Sigma_Y^{-1}A_Y\right)}^{:=V_1^{-1}}x_1 -
+2x_1'\left(A_Y'\Sigma_Y^{-1}y_1 + \Sigma_0^{-1}\mu_0\right)
+\right)
+\right)\\
+& \propto \exp \left(
+-\frac{1}{2} \left(
+x_1 - \overbrace{V_1\left(A_Y'\Sigma_Y^{-1}y_1 + \Sigma_0^{-1}\mu_0\right)}^{:=\mu_1} \right)'V_1^{-1}\left(x_1 - \overbrace{V_1\left(A_Y'\Sigma_Y^{-1}y_1 + \Sigma_0^{-1}\mu_0\right)}^{:=\mu_1}\right)
+\right).
+
+\end{align*}
+
+
+This simple conjugation calculation shows that in this linear Gaussian context, the posterior distribution of $X_1\vert Y_1$ is Gaussian with computable moments.
+
+If we write everynthing in terms of precision, we have that $\Lambda_1 = \Lambda_{0} + A_Y'\Lambda_YA_Y$
+and $\mu_1 =$
